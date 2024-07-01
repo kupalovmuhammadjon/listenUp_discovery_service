@@ -2,7 +2,7 @@ CREATE TYPE genre AS ENUM ('technology', 'education', 'philosophy', 'politics', 
 CREATE TYPE interaction_type AS ENUM ('like', 'listen');
 
 CREATE TABLE episode_metadata (
-    episode_id uuid primary key not null,
+    episode_id uuid primary key,
     podcast_id uuid not null,
     genre genre not null,
     tags TEXT[],
@@ -14,7 +14,7 @@ CREATE TABLE episode_metadata (
 );
 
 CREATE TABLE user_interactions (
-    id uuid PRIMARY KEY default gen_random_uuid() not null,
+    id uuid PRIMARY KEY default gen_random_uuid(),
     user_id uuid not null,
     podcast_id uuid not null,
     episode_id uuid not null,
