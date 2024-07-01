@@ -5,7 +5,10 @@ CREATE TABLE podcast_metadata (
     genre genre not null ,
     tags TEXT[],
     listen_count INTEGER DEFAULT 0,
-    like_count INTEGER DEFAULT 0
+    like_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP
+
 );
 
 CREATE TABLE user_interactions (
