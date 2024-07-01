@@ -1,15 +1,35 @@
 syntax = "proto3";
 
-option go_package = "genproto/composition_metadata";
+option go_package = "genproto/episode_metadata";
 
-service podcast_metadata {
-    rpc GetTrendinPodcasts() returns () {}
-    rpc GetRecommentedPodcasts() returns () {}
-    rpc GetPodcastsByGenre() returns () {}
-    rpc SearchPodcast() returns () {}
-    rpc LikeEpisodeOfPodcast() returns () {}
-    rpc DeleteLikeFromEpisodeOfPodcast() returns () {}
-    rpc ListenEpisodeOfPodcast() returns () {}
+service episode_metadata {
+    rpc GetTrendinPodcasts(Void) returns (Podcasts) {}
+    rpc GetRecommentedPodcasts(Void) returns (Podcasts) {}
+    rpc GetPodcastsByGenre(Genres) returns (Podcasts) {}
+    rpc SearchPodcast(Title) returns (Podcasts) {}
 }
 
-message 
+message Void {}
+
+message Podcast {
+    string podcast_id = 1;
+    string genre = 2;
+    repeated string tags = 3;
+    int64 listen_count = 4;
+    int64 like_count = 5;
+    string created_at = 6;
+    string updated_at = 7;
+}
+
+message Podcasts {
+    repeated Podcast Podcasts = 1;
+}
+
+message Genres {
+    repeated string Genres = 1;
+}
+
+message Title {
+    string Podcast_title = 1;
+    string Episode_title = 2;
+}
