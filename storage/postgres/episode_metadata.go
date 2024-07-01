@@ -115,3 +115,22 @@ func (e *EpisodeMetadataRepo) GetTrendingPodcasts() (*pb.Podcasts, error) {
 
 	return &podcasts, nil
 }
+
+func (e *EpisodeMetadataRepo) GetPodcastIDs() ([]string, error) {
+	rows, err := e.Db.Query("select podcast_id from episode_metadata where deleted_at = null")
+	if err != nil {
+		return nil, err
+	}
+
+	var podcastIDs []string
+	for rows.Next() {
+		var id string
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		podcastIDs = append(podcastIDs, id)
+	}
+
+	return podcastIDs, nil
+}
