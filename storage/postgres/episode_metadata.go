@@ -43,3 +43,23 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]string, e
 
 	return podcastIDs, nil
 }
+
+func (e *EpisodeMetadataRepo) SearchPodcast(titles *pb.Title) ([]string, error) {
+	rows, err := e.Db.Query("select podcast_id from episode_metadata where deleted_at = null")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var podcastIDs []string
+	for rows.Next() {
+		var id string
+		err := rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		podcastIDs = append(podcastIDs, id)
+	}
+
+	return podcastIDs, nil
+}

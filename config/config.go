@@ -11,6 +11,7 @@ import (
 type Config struct {
 	HTTP_PORT              int
 	DISCOVERY_SERVICE_PORT string
+	PODCAST_SERVICE_PORT   string
 	DB_HOST                string
 	DB_PORT                string
 	DB_USER                string
@@ -27,6 +28,7 @@ func Load() *Config {
 
 	config.HTTP_PORT = cast.ToInt(coalesce("HTTP_PORT", 8080))
 	config.DISCOVERY_SERVICE_PORT = cast.ToString(coalesce("COLLABORATION_SERVICE_PORT", 50051))
+	config.PODCAST_SERVICE_PORT = cast.ToString(coalesce("PODCAST_SERVICE_PORT", 50052))
 	config.DB_HOST = cast.ToString(coalesce("DB_HOST", "localhost"))
 	config.DB_PORT = cast.ToString(coalesce("DB_PORT", "5432"))
 	config.DB_USER = cast.ToString(coalesce("DB_USER", "postgres"))

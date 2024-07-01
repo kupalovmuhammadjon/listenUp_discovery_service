@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+option go_package = "genproto/podcasts";
+
+service Podcasts {
+    rpc CreatePodcast(PodcastCreate) returns (ID) {}
+    rpc GetPodcastById(ID) returns (Podcast) {}
+    rpc UpdatePodcast(PodcastUpdate) returns (Void) {}
+    rpc DeletePodcast(ID) returns (Void) {}
+    rpc GetUserPodcasts(ID) returns (UserPodcasts) {}
+}
+
+message PodcastCreate {
+    string user_id = 1;
+    string title = 2;
+    string description = 3;
+    string status = 4;
+}
+
+message ID {
+    string id = 1;
+}
+
+message Podcast {
+    string id = 1;
+    string user_id = 2;
+    string title = 3;
+    string description = 4;
+    string created_at = 5;
+    string updated_at = 6;
+}
+
+message PodcastUpdate {
+    string id = 1;
+    string user_id = 2;
+    string title = 3;
+    string description = 4;
+    string status = 5;
+}
+
+message Void {
+}
+
+message UserPodcasts {
+    repeated Podcast Podcasts = 1;
+}
+
