@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option go_package = "genproto/composition_metadata";
+
+service podcast_metadata {
+    rpc GetTrendinPodcasts() returns () {}
+    rpc GetRecommentedPodcasts() returns () {}
+    rpc GetPodcastsByGenre() returns () {}
+    rpc SearchPodcast() returns () {}
+    rpc LikeEpisodeOfPodcast() returns () {}
+    rpc DeleteLikeFromEpisodeOfPodcast() returns () {}
+    rpc ListenEpisodeOfPodcast() returns () {}
+}
+
+message 
