@@ -22,8 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type EpisodeMetadataClient interface {
+	CreateEpisodeMetaData(ctx context.Context, in *EpisodeMetadata, opts ...grpc.CallOption) (*Void, error)
 	GetTrendingPodcasts(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Podcasts, error)
-	GetRecommendedPodcasts(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Podcasts, error)
+	GetRecommendedPodcasts(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Podcasts, error)
 	GetPodcastsByGenre(ctx context.Context, in *Genres, opts ...grpc.CallOption) (*Podcasts, error)
 	SearchPodcast(ctx context.Context, in *Title, opts ...grpc.CallOption) (*Podcasts, error)
 }
@@ -36,6 +37,15 @@ func NewEpisodeMetadataClient(cc grpc.ClientConnInterface) EpisodeMetadataClient
 	return &episodeMetadataClient{cc}
 }
 
+func (c *episodeMetadataClient) CreateEpisodeMetaData(ctx context.Context, in *EpisodeMetadata, opts ...grpc.CallOption) (*Void, error) {
+	out := new(Void)
+	err := c.cc.Invoke(ctx, "/episode_metadata/CreateEpisodeMetaData", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *episodeMetadataClient) GetTrendingPodcasts(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
 	err := c.cc.Invoke(ctx, "/episode_metadata/GetTrendingPodcasts", in, out, opts...)
@@ -45,7 +55,7 @@ func (c *episodeMetadataClient) GetTrendingPodcasts(ctx context.Context, in *Voi
 	return out, nil
 }
 
-func (c *episodeMetadataClient) GetRecommendedPodcasts(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Podcasts, error) {
+func (c *episodeMetadataClient) GetRecommendedPodcasts(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
 	err := c.cc.Invoke(ctx, "/episode_metadata/GetRecommendedPodcasts", in, out, opts...)
 	if err != nil {
@@ -76,8 +86,9 @@ func (c *episodeMetadataClient) SearchPodcast(ctx context.Context, in *Title, op
 // All implementations must embed UnimplementedEpisodeMetadataServer
 // for forward compatibility
 type EpisodeMetadataServer interface {
+	CreateEpisodeMetaData(context.Context, *EpisodeMetadata) (*Void, error)
 	GetTrendingPodcasts(context.Context, *Void) (*Podcasts, error)
-	GetRecommendedPodcasts(context.Context, *Void) (*Podcasts, error)
+	GetRecommendedPodcasts(context.Context, *ID) (*Podcasts, error)
 	GetPodcastsByGenre(context.Context, *Genres) (*Podcasts, error)
 	SearchPodcast(context.Context, *Title) (*Podcasts, error)
 	mustEmbedUnimplementedEpisodeMetadataServer()
@@ -87,10 +98,13 @@ type EpisodeMetadataServer interface {
 type UnimplementedEpisodeMetadataServer struct {
 }
 
+func (UnimplementedEpisodeMetadataServer) CreateEpisodeMetaData(context.Context, *EpisodeMetadata) (*Void, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateEpisodeMetaData not implemented")
+}
 func (UnimplementedEpisodeMetadataServer) GetTrendingPodcasts(context.Context, *Void) (*Podcasts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTrendingPodcasts not implemented")
 }
-func (UnimplementedEpisodeMetadataServer) GetRecommendedPodcasts(context.Context, *Void) (*Podcasts, error) {
+func (UnimplementedEpisodeMetadataServer) GetRecommendedPodcasts(context.Context, *ID) (*Podcasts, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRecommendedPodcasts not implemented")
 }
 func (UnimplementedEpisodeMetadataServer) GetPodcastsByGenre(context.Context, *Genres) (*Podcasts, error) {
@@ -112,6 +126,24 @@ func RegisterEpisodeMetadataServer(s grpc.ServiceRegistrar, srv EpisodeMetadataS
 	s.RegisterService(&EpisodeMetadata_ServiceDesc, srv)
 }
 
+func _EpisodeMetadata_CreateEpisodeMetaData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EpisodeMetadata)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(EpisodeMetadataServer).CreateEpisodeMetaData(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/episode_metadata/CreateEpisodeMetaData",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(EpisodeMetadataServer).CreateEpisodeMetaData(ctx, req.(*EpisodeMetadata))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _EpisodeMetadata_GetTrendingPodcasts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Void)
 	if err := dec(in); err != nil {
@@ -131,7 +163,7 @@ func _EpisodeMetadata_GetTrendingPodcasts_Handler(srv interface{}, ctx context.C
 }
 
 func _EpisodeMetadata_GetRecommendedPodcasts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Void)
+	in := new(ID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -143,7 +175,7 @@ func _EpisodeMetadata_GetRecommendedPodcasts_Handler(srv interface{}, ctx contex
 		FullMethod: "/episode_metadata/GetRecommendedPodcasts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EpisodeMetadataServer).GetRecommendedPodcasts(ctx, req.(*Void))
+		return srv.(EpisodeMetadataServer).GetRecommendedPodcasts(ctx, req.(*ID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -191,6 +223,10 @@ var EpisodeMetadata_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "episode_metadata",
 	HandlerType: (*EpisodeMetadataServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateEpisodeMetaData",
+			Handler:    _EpisodeMetadata_CreateEpisodeMetaData_Handler,
+		},
 		{
 			MethodName: "GetTrendingPodcasts",
 			Handler:    _EpisodeMetadata_GetTrendingPodcasts_Handler,
