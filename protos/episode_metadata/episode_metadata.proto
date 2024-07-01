@@ -3,8 +3,9 @@ syntax = "proto3";
 option go_package = "genproto/episode_metadata";
 
 service episode_metadata {
+    rpc CreateEpisodeMetaData(EpisodeMetadata) returns (Void) {}
     rpc GetTrendingPodcasts(Void) returns (Podcasts) {}
-    rpc GetRecommendedPodcasts(Void) returns (Podcasts) {}
+    rpc GetRecommendedPodcasts(ID) returns (Podcasts) {}
     rpc GetPodcastsByGenre(Genres) returns (Podcasts) {}
     rpc SearchPodcast(Title) returns (Podcasts) {}
 }
@@ -38,4 +39,15 @@ message Title {
 
 message ID {
     string Id = 1;
+}
+
+message EpisodeMetadata{
+    string episode_id = 1;
+    string podcast_id = 2;
+    string genre = 3;
+    repeated string tags = 4;
+}
+
+message PodcastsId {
+    repeated string PodcastsId = 1;
 }
