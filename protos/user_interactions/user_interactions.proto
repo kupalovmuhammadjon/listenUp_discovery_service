@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "genproto/user_interactions";
+
+service user_interactions {
+    rpc LikeEpisodeOfPodcast(InteractEpisode) returns (ID) {}
+    rpc DeleteLikeFromEpisodeOfPodcast(DeleteLike) returns (Success) {}
+    rpc ListenEpisodeOfPodcast(InteractEpisode) returns (ID) {}
+}
+
+message InteractEpisode {
+    string user_id = 1;
+    string podcast_id = 2;
+    string episode_id = 3;
+    string interaction_type = 4;
+}
+
+message ID {
+    string id = 1;
+}
+
+message DeleteLike {
+    string user_id = 1;
+    string podcast_id = 2;
+    string episode_id = 3;
+}
+
+message Success {
+    bool Success = 1;
+}

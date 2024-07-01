@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option go_package = "genproto/episode_metadata";
+
+service episode_metadata {
+    rpc GetTrendingPodcasts(Void) returns (Podcasts) {}
+    rpc GetRecommendedPodcasts(Void) returns (Podcasts) {}
+    rpc GetPodcastsByGenre(Genres) returns (Podcasts) {}
+    rpc SearchPodcast(Title) returns (Podcasts) {}
+}
+
+message Void {}
+
+message Podcast {
+    string podcast_id = 1;
+    string genre = 2;
+    repeated string tags = 3;
+    int64 listen_count = 4;
+    int64 like_count = 5;
+    string created_at = 6;
+    string updated_at = 7;
+}
+
+message Podcasts {
+    repeated Podcast Podcasts = 1;
+}
+
+message Genres {
+    repeated string Genres = 1;
+}
+
+message Title {
+    string Podcast_title = 1;
+    string Episode_title = 2;
+}
