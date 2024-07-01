@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func RetrieveTitles(podcastIDs []string) (map[string]string, map[string][]string, error) {
+func RetrieveTitles(podcastIDs []string) ([]*pbP.Podcast, map[string]*pbE.Episodes, error) {
 	cfg := config.Load()
 	conn, err := grpc.NewClient(cfg.PODCAST_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -22,12 +22,12 @@ func RetrieveTitles(podcastIDs []string) (map[string]string, map[string][]string
 	p := pbP.NewPodcastsClient(conn)
 	e := pbE.NewEpisodesServiceClient(conn)
 
-	podcasts, err := GetPodcastTitles(p, podcastIDs)
+	podcasts, err := GetPodcasts(p, podcastIDs)
 	if err != nil {
 		return nil, nil, errors.New("failed to fetch podcast titles: " + err.Error())
 	}
 
-	episodes, err := GetEpisodeTitles(e, podcastIDs)
+	episodes, err := GetEpisodes(e, podcastIDs)
 	if err != nil {
 		return nil, nil, errors.New("failed to fetch episode titles: " + err.Error())
 	}
@@ -35,32 +35,29 @@ func RetrieveTitles(podcastIDs []string) (map[string]string, map[string][]string
 	return podcasts, episodes, nil
 }
 
-func GetPodcastTitles(p pbP.PodcastsClient, ids []string) (map[string]string, error) {
-	var res = make(map[string]string, 0)
+func GetPodcasts(p pbP.PodcastsClient, ids []string) ([]*pbP.Podcast, error) {
+	var res []*pbP.Podcast
 
 	for _, v := range ids {
 		podcast, err := p.GetPodcastById(context.Background(), &pbP.ID{Id: v})
 		if err != nil {
 			return nil, err
 		}
-		res[v] = podcast.Title
+		res = append(res, podcast)
 	}
 
 	return res, nil
 }
 
-func GetEpisodeTitles(e pbE.EpisodesServiceClient, ids []string) (map[string][]string, error) {
-	res := make(map[string][]string, 0)
+func GetEpisodes(e pbE.EpisodesServiceClient, ids []string) (map[string]*pbE.Episodes, error) {
+	res := make(map[string]*pbE.Episodes, 0)
 
 	for _, v := range ids {
 		episodes, err := e.GetEpisodesByPodcastId(context.Background(), &pbE.ID{Id: v})
 		if err != nil {
 			return nil, err
 		}
-
-		for _, e := range episodes.Episodes {
-			res[v] = append(res[v], e.Title)
-		}
+		res[v] = episodes
 	}
 
 	return res, nil
