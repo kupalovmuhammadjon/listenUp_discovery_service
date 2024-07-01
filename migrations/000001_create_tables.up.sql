@@ -7,9 +7,8 @@ CREATE TABLE podcast_metadata (
     tags TEXT[],
     listen_count INTEGER DEFAULT 0,
     like_count INTEGER DEFAULT 0,
-    created_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ,
     updated_at TIMESTAMP
-
 );
 
 CREATE TABLE user_interactions (
@@ -17,5 +16,6 @@ CREATE TABLE user_interactions (
     user_id uuid,
     podcast_id uuid,
     interaction_type interaction_type not null ,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    deleted_at timestamp
 );
