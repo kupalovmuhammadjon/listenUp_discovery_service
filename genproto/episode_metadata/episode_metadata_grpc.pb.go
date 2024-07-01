@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: composition_metadata.proto
+// source: episode_metadata.proto
 
 package episode_metadata
 
@@ -209,5 +209,5 @@ var EpisodeMetadata_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "composition_metadata.proto",
+	Metadata: "episode_metadata.proto",
 }
