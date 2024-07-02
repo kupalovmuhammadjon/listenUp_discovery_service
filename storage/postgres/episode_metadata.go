@@ -107,7 +107,7 @@ func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastsId *[]string) (*pb.
 	return &podcasts, nil
 }
 
-func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]pb.Podcast, error) {
+func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]*pb.Podcast, error) {
 	query := `select em.podcast_id,
 	array_agg(em.genre) as genres,
 	array_agg(em.tags) as tags,
@@ -131,7 +131,7 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]pb.Podcas
 	}
 	defer rows.Close()
 
-	var podcasts []pb.Podcast
+	var podcasts []*pb.Podcast
 	for rows.Next() {
 		var id, genre string
 		var tags []string
@@ -140,7 +140,7 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]pb.Podcas
 		if err != nil {
 			return nil, err
 		}
-		podcasts = append(podcasts, pb.Podcast{PodcastId: id,
+		podcasts = append(podcasts, &pb.Podcast{PodcastId: id,
 			Genre:       genre,
 			Tags:        tags,
 			ListenCount: int64(listen),
@@ -150,7 +150,7 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(genres *pb.Genres) ([]pb.Podcas
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataRepo) SearchPodcast(titles *pb.Title) ([]pb.Podcast, error) {
+func (e *EpisodeMetadataRepo) SearchPodcast(titles *pb.Title) ([]*pb.Podcast, error) {
 	query := `select em.podcast_id,
 	array_agg(em.genre) as genres,
 	array_agg(em.tags) as tags,
@@ -168,7 +168,7 @@ func (e *EpisodeMetadataRepo) SearchPodcast(titles *pb.Title) ([]pb.Podcast, err
 	}
 	defer rows.Close()
 
-	var podcasts []pb.Podcast
+	var podcasts []*pb.Podcast
 	for rows.Next() {
 		var id, genre string
 		var tags []string
@@ -177,7 +177,7 @@ func (e *EpisodeMetadataRepo) SearchPodcast(titles *pb.Title) ([]pb.Podcast, err
 		if err != nil {
 			return nil, err
 		}
-		podcasts = append(podcasts, pb.Podcast{PodcastId: id,
+		podcasts = append(podcasts, &pb.Podcast{PodcastId: id,
 			Genre:       genre,
 			Tags:        tags,
 			ListenCount: int64(listen),
