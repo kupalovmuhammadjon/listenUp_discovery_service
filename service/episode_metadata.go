@@ -20,7 +20,7 @@ type EpisodeMetadata struct {
 	ClientComment        pbComment.CommentsClient
 }
 
-func GetArgumentOfEpisodeMetadate() (*postgres.EpisodeMetadataRepo, pbCollaboration.CollaborationsClient, pbPodcast.PodcastsClient, pbComment.CommentsClient) {
+func GetArgumentOfEpisodeMetadate(db *sql.DB) (*postgres.EpisodeMetadataRepo, pbCollaboration.CollaborationsClient, pbPodcast.PodcastsClient, pbComment.CommentsClient) {
 	episodeMetadataRepo := postgres.NewEpisodeMetadataRepo(db)
 	ClientCollaborations, err := pkg.CreateCollaborationsClient()
 	if err != nil {
@@ -39,7 +39,7 @@ func GetArgumentOfEpisodeMetadate() (*postgres.EpisodeMetadataRepo, pbCollaborat
 }
 
 func NewEpisodeMetadata(db *sql.DB) *EpisodeMetadata {
-	episodeMetadataRepo, ClientCollaborations, ClientPodcasts, ClientComment := GetArgumentOfEpisodeMetadate()
+	episodeMetadataRepo, ClientCollaborations, ClientPodcasts, ClientComment := GetArgumentOfEpisodeMetadate(db)
 	return &EpisodeMetadata{
 		EpisodeMetadataRepo:  episodeMetadataRepo,
 		ClientCollaborations: ClientCollaborations,
@@ -56,6 +56,9 @@ func (e *EpisodeMetadata) GetRecommendedPodcasts(ctx context.Context, userId *pb
 
 	// podcasts Id of Recommentded podcasts
 	podcastsId, err := e.ClientCollaborations.GetAllPodcastsUsersWorkedOn(ctx, &pbCollaboration.PodcastsId{PodcastsId: podcastsIdUserWatched.PodcastsId})
+	if err != nil {
+		return nil, err
+	}
 
 	podcasts, err := e.EpisodeMetadataRepo.GetRecommendedPodcasts(&podcastsId.PodcastsId)
 	if err != nil {
