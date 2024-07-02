@@ -27,6 +27,7 @@ type CollaborationsClient interface {
 	GetCollaboratorsByPodcastId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Collaborators, error)
 	UpdateCollaboratorByPodcastId(ctx context.Context, in *UpdateCollaborator, opts ...grpc.CallOption) (*Void, error)
 	DeleteCollaboratorByPodcastId(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Void, error)
+	GetAllPodcastsUsersWorkedOn(ctx context.Context, in *PodcastsId, opts ...grpc.CallOption) (*PodcastsId, error)
 }
 
 type collaborationsClient struct {
@@ -82,6 +83,15 @@ func (c *collaborationsClient) DeleteCollaboratorByPodcastId(ctx context.Context
 	return out, nil
 }
 
+func (c *collaborationsClient) GetAllPodcastsUsersWorkedOn(ctx context.Context, in *PodcastsId, opts ...grpc.CallOption) (*PodcastsId, error) {
+	out := new(PodcastsId)
+	err := c.cc.Invoke(ctx, "/Collaborations/GetAllPodcastsUsersWorkedOn", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CollaborationsServer is the server API for Collaborations service.
 // All implementations must embed UnimplementedCollaborationsServer
 // for forward compatibility
@@ -91,6 +101,7 @@ type CollaborationsServer interface {
 	GetCollaboratorsByPodcastId(context.Context, *ID) (*Collaborators, error)
 	UpdateCollaboratorByPodcastId(context.Context, *UpdateCollaborator) (*Void, error)
 	DeleteCollaboratorByPodcastId(context.Context, *Ids) (*Void, error)
+	GetAllPodcastsUsersWorkedOn(context.Context, *PodcastsId) (*PodcastsId, error)
 	mustEmbedUnimplementedCollaborationsServer()
 }
 
@@ -112,6 +123,9 @@ func (UnimplementedCollaborationsServer) UpdateCollaboratorByPodcastId(context.C
 }
 func (UnimplementedCollaborationsServer) DeleteCollaboratorByPodcastId(context.Context, *Ids) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteCollaboratorByPodcastId not implemented")
+}
+func (UnimplementedCollaborationsServer) GetAllPodcastsUsersWorkedOn(context.Context, *PodcastsId) (*PodcastsId, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllPodcastsUsersWorkedOn not implemented")
 }
 func (UnimplementedCollaborationsServer) mustEmbedUnimplementedCollaborationsServer() {}
 
@@ -216,6 +230,24 @@ func _Collaborations_DeleteCollaboratorByPodcastId_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Collaborations_GetAllPodcastsUsersWorkedOn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PodcastsId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollaborationsServer).GetAllPodcastsUsersWorkedOn(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Collaborations/GetAllPodcastsUsersWorkedOn",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollaborationsServer).GetAllPodcastsUsersWorkedOn(ctx, req.(*PodcastsId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Collaborations_ServiceDesc is the grpc.ServiceDesc for Collaborations service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +274,10 @@ var Collaborations_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteCollaboratorByPodcastId",
 			Handler:    _Collaborations_DeleteCollaboratorByPodcastId_Handler,
+		},
+		{
+			MethodName: "GetAllPodcastsUsersWorkedOn",
+			Handler:    _Collaborations_GetAllPodcastsUsersWorkedOn_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
