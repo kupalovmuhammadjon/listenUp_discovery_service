@@ -3,24 +3,48 @@ package service
 import (
 	"context"
 	"database/sql"
-	pbC "discovery_service/genproto/collaborations"
+	pbCollaboration "discovery_service/genproto/collaborations"
+	pbComment "discovery_service/genproto/comments"
 	pb "discovery_service/genproto/episode_metadata"
-	pbP "discovery_service/genproto/podcasts"
+	pbPodcast "discovery_service/genproto/podcasts"
+	"discovery_service/pkg"
 	"discovery_service/storage/postgres"
+	"log"
 )
 
 type EpisodeMetadata struct {
 	pb.UnimplementedEpisodeMetadataServer
 	EpisodeMetadataRepo  *postgres.EpisodeMetadataRepo
-	ClientCollaborations pbC.CollaborationsClient
-	ClientPodcasts       pbP.PodcastsClient
+	ClientCollaborations pbCollaboration.CollaborationsClient
+	ClientPodcasts       pbPodcast.PodcastsClient
+	ClientComment        pbComment.CommentsClient
 }
 
-func NewEpisodeMetadata(db *sql.DB, ClientCollaborations pbC.CollaborationsClient) *EpisodeMetadata {
+func GetArgumentOfEpisodeMetadate() (*postgres.EpisodeMetadataRepo, pbCollaboration.CollaborationsClient, pbPodcast.PodcastsClient, pbComment.CommentsClient) {
 	episodeMetadataRepo := postgres.NewEpisodeMetadataRepo(db)
+	ClientCollaborations, err := pkg.CreateCollaborationsClient()
+	if err != nil {
+		log.Println(err)
+	}
+	ClientPodcasts, err := pkg.CreatePodcastClient()
+	if err != nil {
+		log.Println(err)
+	}
+	ClientComment, err := pkg.CreateCommentsClient()
+	if err != nil {
+		log.Println(err)
+	}
+
+	return episodeMetadataRepo, ClientCollaborations, ClientPodcasts, ClientComment
+}
+
+func NewEpisodeMetadata(db *sql.DB) *EpisodeMetadata {
+	episodeMetadataRepo, ClientCollaborations, ClientPodcasts, ClientComment := GetArgumentOfEpisodeMetadate()
 	return &EpisodeMetadata{
 		EpisodeMetadataRepo:  episodeMetadataRepo,
 		ClientCollaborations: ClientCollaborations,
+		ClientPodcasts:       ClientPodcasts,
+		ClientComment:        ClientComment,
 	}
 }
 
@@ -31,7 +55,7 @@ func (e *EpisodeMetadata) GetRecommendedPodcasts(ctx context.Context, userId *pb
 	}
 
 	// podcasts Id of Recommentded podcasts
-	podcastsId, err := e.ClientCollaborations.GetAllPodcastsUsersWorkedOn(ctx, &pbC.PodcastsId{PodcastsId: podcastsIdUserWatched.PodcastsId})
+	podcastsId, err := e.ClientCollaborations.GetAllPodcastsUsersWorkedOn(ctx, &pbCollaboration.PodcastsId{PodcastsId: podcastsIdUserWatched.PodcastsId})
 
 	podcasts, err := e.EpisodeMetadataRepo.GetRecommendedPodcasts(&podcastsId.PodcastsId)
 	if err != nil {
@@ -39,7 +63,7 @@ func (e *EpisodeMetadata) GetRecommendedPodcasts(ctx context.Context, userId *pb
 	}
 
 	for i := range podcasts.Podcasts {
-		id := pbP.ID{Id: podcasts.Podcasts[i].PodcastId}
+		id := pbPodcast.ID{Id: podcasts.Podcasts[i].PodcastId}
 		additial, err := e.ClientPodcasts.GetPodcastById(ctx, &id)
 		if err != nil {
 			return nil, err
@@ -53,6 +77,7 @@ func (e *EpisodeMetadata) GetRecommendedPodcasts(ctx context.Context, userId *pb
 
 		// from comments
 		// comment_count
+		e.ClientComment.CountComments(ctx, &pbComment.CountFilter{PodcastId: id.Id})
 	}
 	return podcasts, nil
 }

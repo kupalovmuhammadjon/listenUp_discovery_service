@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+option go_package = "genproto/comments";
+
+service Comments {
+    rpc CreateCommentByPodcastId(CreateComment) returns (ID);
+    rpc GetCommentsByPodcastId(ID) returns (AllComments);
+    rpc CreateCommentByEpisodeId(EpisodeComment) returns (ID);
+    rpc GetCommentsByEpisodeId(ID) returns (AllComments);
+    rpc CountComments(CountFilter) returns (CommentCount);
+}
+
+message CreateComment{
+  string podcast_id = 1;
+  string user_id = 2;
+  string content = 3;
+}
+
+message EpisodeComment{
+  string episode_id = 1;
+  string user_id = 2;
+  string content = 3;
+}
+
+message ID {
+  string id = 1;
+}
+
+message CommentInfo {
+  string UserId = 1;
+  string Content = 2;
+  string created_at = 3;
+  string updated_at = 5;
+}
+
+message Comment{
+  string username = 2;
+  string content = 3;
+  string created_at = 4;
+  string updated_at = 5;
+}
+
+message AllComments{
+  repeated Comment comments = 1;
+}
+
+message CommentCount{
+  int64 Count = 1;
+}
+
+message CountFilter{
+  string EpisodeId = 1;
+  string PodcastId = 2;
+}
