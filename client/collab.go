@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"discovery_service/config"
 	pb "discovery_service/genproto/comments"
 	"errors"
@@ -10,7 +9,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func RetrieveComments(podcastID string) (*pb.AllComments, error) {
+func CommentsClient(podcastID string) (*pb.CommentsClient, error) {
 	cfg := config.Load()
 	conn, err := grpc.NewClient(cfg.COLLABORATION_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -20,10 +19,5 @@ func RetrieveComments(podcastID string) (*pb.AllComments, error) {
 
 	c := pb.NewCommentsClient(conn)
 
-	comments, err := c.GetCommentsByPodcastId(context.Background(), &pb.ID{Id: podcastID})
-	if err != nil {
-		return nil, err
-	}
-
-	return comments, nil
+	return &c, nil
 }

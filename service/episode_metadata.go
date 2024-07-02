@@ -1,14 +1,10 @@
 package service
 
 import (
-	// "context"
+	"context"
 	"database/sql"
-<<<<<<< HEAD
-	// "discovery_service/client"
-=======
 	"discovery_service/client"
 	pbc "discovery_service/genproto/comments"
->>>>>>> origin/Muhammadjon
 	pb "discovery_service/genproto/episode_metadata"
 	pbp "discovery_service/genproto/podcasts"
 
@@ -24,47 +20,10 @@ type EpisodeMetadataService struct {
 
 func NewEpisodeMetadataService(db *sql.DB, podcastClient *pbp.PodcastsClient, commentClient *pbc.CommentsClient) *EpisodeMetadataService {
 	return &EpisodeMetadataService{
-		Repo: postgres.NewEpisodeMetadataRepo(db),
+		Repo:          postgres.NewEpisodeMetadataRepo(db),
 		PodcastClient: podcastClient,
 		CommentClient: commentClient,
 	}
-}
-
-<<<<<<< HEAD
-// func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Genres) (*pb.Podcasts, error) {
-// 	ids, err := e.Repo.GetPodcastIDs()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-	
-// 	podcasts, _, err := client.RetrieveTitles(ids)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	for _, v := range podcasts {
-// 		v.
-// 	}
-
-// 	return nil, nil
-// }
-=======
-func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Genres) (*pb.Podcasts, error) {
-	ids, err := e.Repo.GetPodcastIDs()
-	if err != nil {
-		return nil, err
-	}
-
-	podcasts, _, err := client.RetrieveTitles(ids)
-	if err != nil {
-		return nil, err
-	}
-
-	// for _, v := range podcasts {
-
-	// }
-
-	return nil, nil
 }
 
 func (e *EpisodeMetadataService) CreateEpisodeMetaData(ctx context.Context, episode *pb.EpisodeMetadata) (*pb.Void, error) {
@@ -95,4 +54,21 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(context.Context, *pb.Void) 
 
 	return podcasts, nil
 }
->>>>>>> origin/Muhammadjon
+
+func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Genres) (*pb.Podcasts, error) {
+	podcastInfo, err := e.Repo.GetPodcastsByGenre(req)
+	if err != nil {
+		return nil, err
+	}
+
+	podcasts, _, err := client.RetrieveTitles(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	// for _, v := range podcasts {
+
+	// }
+
+	return nil, nil
+}
