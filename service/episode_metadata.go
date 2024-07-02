@@ -1,9 +1,9 @@
 package service
 
 import (
-	"context"
+	// "context"
 	"database/sql"
-	"discovery_service/client"
+	// "discovery_service/client"
 	pb "discovery_service/genproto/episode_metadata"
 	"discovery_service/storage/postgres"
 )
@@ -19,20 +19,20 @@ func NewEpisodeMetadataService(db *sql.DB) *EpisodeMetadataService {
 	}
 }
 
-func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Genres) (*pb.Podcasts, error) {
-	ids, err := e.Repo.GetPodcastIDs()
-	if err != nil {
-		return nil, err
-	}
+// func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Genres) (*pb.Podcasts, error) {
+// 	ids, err := e.Repo.GetPodcastIDs()
+// 	if err != nil {
+// 		return nil, err
+// 	}
 	
-	podcasts, _, err := client.RetrieveTitles(ids)
-	if err != nil {
-		return nil, err
-	}
+// 	podcasts, _, err := client.RetrieveTitles(ids)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	// for _, v := range podcasts {
-		
-	// }
+// 	for _, v := range podcasts {
+// 		v.
+// 	}
 
-	return nil, nil
-}
+// 	return nil, nil
+// }

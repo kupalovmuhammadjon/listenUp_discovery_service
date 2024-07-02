@@ -37,12 +37,20 @@ func (u *UserInterRepo) LikeEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID, e
 		return nil, err
 	}
 
+	query = `update episode_metadata
+	set like_count = like_count + 1
+	where deleted_at is null and podcast_id = $1 and episode_id = $2`
+	_, err = tr.Exec(query, ids.PodcastId, ids.EpisodeId)
+	if err != nil {
+		return nil, err
+	}
+
 	return &pb.ID{Id: id}, nil
 }
 
 func (u *UserInterRepo) DeleteLikeFromEpisodeOfPodcast(ids *pb.DeleteLike) (*pb.Success, error) {
 	query := `delete from user_interactions
-	where deleted_at = null and user_id = $1 and podcast_id = $2 and episode_id = $3`
+	where deleted_at is null and user_id = $1 and podcast_id = $2 and episode_id = $3`
 
 	tr, err := u.Db.Begin()
 	if err != nil {
@@ -58,6 +66,14 @@ func (u *UserInterRepo) DeleteLikeFromEpisodeOfPodcast(ids *pb.DeleteLike) (*pb.
 	}()
 
 	_, err = tr.Exec(query, ids.UserId, ids.PodcastId, ids.EpisodeId)
+	if err != nil {
+		return &pb.Success{Success: false}, err
+	}
+
+	query = `update episode_metadata
+	set like_count = like_count - 1
+	where deleted_at is null and podcast_id = $1 and episode_id = $2`
+	_, err = tr.Exec(query, ids.PodcastId, ids.EpisodeId)
 	if err != nil {
 		return &pb.Success{Success: false}, err
 	}
@@ -85,6 +101,14 @@ func (u *UserInterRepo) ListenEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID,
 	var id string
 	row := tr.QueryRow(query, ids.UserId, ids.PodcastId, ids.EpisodeId, ids.InteractionType)
 	err = row.Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+
+	query = `update episode_metadata
+	set listen_count = listen_count + 1
+	where deleted_at is null and podcast_id = $1 and episode_id = $2`
+	_, err = tr.Exec(query, ids.PodcastId, ids.EpisodeId)
 	if err != nil {
 		return nil, err
 	}
