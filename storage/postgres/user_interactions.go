@@ -14,7 +14,9 @@ func NewUserInterRepo(db *sql.DB) *UserInterRepo {
 }
 
 func (u *UserInterRepo) LikeEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID, error) {
-	query := `insert into user_interactions(user_id, podcast_id, episode_id, interaction_type)
+	query := `
+	insert into 
+		user_interactions(user_id, podcast_id, episode_id, interaction_type)
 	values ($1, $2, $3, $4) returning id`
 
 	tr, err := u.Db.Begin()
@@ -37,9 +39,13 @@ func (u *UserInterRepo) LikeEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID, e
 		return nil, err
 	}
 
-	query = `update episode_metadata
-	set like_count = like_count + 1
-	where deleted_at is null and podcast_id = $1 and episode_id = $2`
+	query = `
+	update 
+		episode_metadata
+	set 
+		like_count = like_count + 1
+	where 
+		deleted_at is null and podcast_id = $1 and episode_id = $2`
 	_, err = tr.Exec(query, ids.PodcastId, ids.EpisodeId)
 	if err != nil {
 		return nil, err

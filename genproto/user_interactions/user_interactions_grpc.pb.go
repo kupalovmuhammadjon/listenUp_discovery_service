@@ -37,7 +37,7 @@ func NewUserInteractionsClient(cc grpc.ClientConnInterface) UserInteractionsClie
 
 func (c *userInteractionsClient) LikeEpisodeOfPodcast(ctx context.Context, in *InteractEpisode, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/user_interactions/LikeEpisodeOfPodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user_interactions.user_interactions/LikeEpisodeOfPodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func (c *userInteractionsClient) LikeEpisodeOfPodcast(ctx context.Context, in *I
 
 func (c *userInteractionsClient) DeleteLikeFromEpisodeOfPodcast(ctx context.Context, in *DeleteLike, opts ...grpc.CallOption) (*Success, error) {
 	out := new(Success)
-	err := c.cc.Invoke(ctx, "/user_interactions/DeleteLikeFromEpisodeOfPodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user_interactions.user_interactions/DeleteLikeFromEpisodeOfPodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (c *userInteractionsClient) DeleteLikeFromEpisodeOfPodcast(ctx context.Cont
 
 func (c *userInteractionsClient) ListenEpisodeOfPodcast(ctx context.Context, in *InteractEpisode, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/user_interactions/ListenEpisodeOfPodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user_interactions.user_interactions/ListenEpisodeOfPodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func _UserInteractions_LikeEpisodeOfPodcast_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_interactions/LikeEpisodeOfPodcast",
+		FullMethod: "/user_interactions.user_interactions/LikeEpisodeOfPodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserInteractionsServer).LikeEpisodeOfPodcast(ctx, req.(*InteractEpisode))
@@ -126,7 +126,7 @@ func _UserInteractions_DeleteLikeFromEpisodeOfPodcast_Handler(srv interface{}, c
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_interactions/DeleteLikeFromEpisodeOfPodcast",
+		FullMethod: "/user_interactions.user_interactions/DeleteLikeFromEpisodeOfPodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserInteractionsServer).DeleteLikeFromEpisodeOfPodcast(ctx, req.(*DeleteLike))
@@ -144,7 +144,7 @@ func _UserInteractions_ListenEpisodeOfPodcast_Handler(srv interface{}, ctx conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/user_interactions/ListenEpisodeOfPodcast",
+		FullMethod: "/user_interactions.user_interactions/ListenEpisodeOfPodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserInteractionsServer).ListenEpisodeOfPodcast(ctx, req.(*InteractEpisode))
@@ -156,7 +156,7 @@ func _UserInteractions_ListenEpisodeOfPodcast_Handler(srv interface{}, ctx conte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserInteractions_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "user_interactions",
+	ServiceName: "user_interactions.user_interactions",
 	HandlerType: (*UserInteractionsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

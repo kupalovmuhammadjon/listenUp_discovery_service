@@ -39,7 +39,7 @@ func NewEpisodeMetadataClient(cc grpc.ClientConnInterface) EpisodeMetadataClient
 
 func (c *episodeMetadataClient) CreateEpisodeMetaData(ctx context.Context, in *EpisodeMetadata, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/episode_metadata/CreateEpisodeMetaData", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episode_metadata.episode_metadata/CreateEpisodeMetaData", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *episodeMetadataClient) CreateEpisodeMetaData(ctx context.Context, in *E
 
 func (c *episodeMetadataClient) GetTrendingPodcasts(ctx context.Context, in *Void, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
-	err := c.cc.Invoke(ctx, "/episode_metadata/GetTrendingPodcasts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episode_metadata.episode_metadata/GetTrendingPodcasts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *episodeMetadataClient) GetTrendingPodcasts(ctx context.Context, in *Voi
 
 func (c *episodeMetadataClient) GetRecommendedPodcasts(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
-	err := c.cc.Invoke(ctx, "/episode_metadata/GetRecommendedPodcasts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episode_metadata.episode_metadata/GetRecommendedPodcasts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *episodeMetadataClient) GetRecommendedPodcasts(ctx context.Context, in *
 
 func (c *episodeMetadataClient) GetPodcastsByGenre(ctx context.Context, in *Genres, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
-	err := c.cc.Invoke(ctx, "/episode_metadata/GetPodcastsByGenre", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episode_metadata.episode_metadata/GetPodcastsByGenre", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *episodeMetadataClient) GetPodcastsByGenre(ctx context.Context, in *Genr
 
 func (c *episodeMetadataClient) SearchPodcast(ctx context.Context, in *Title, opts ...grpc.CallOption) (*Podcasts, error) {
 	out := new(Podcasts)
-	err := c.cc.Invoke(ctx, "/episode_metadata/SearchPodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episode_metadata.episode_metadata/SearchPodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _EpisodeMetadata_CreateEpisodeMetaData_Handler(srv interface{}, ctx context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/episode_metadata/CreateEpisodeMetaData",
+		FullMethod: "/episode_metadata.episode_metadata/CreateEpisodeMetaData",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodeMetadataServer).CreateEpisodeMetaData(ctx, req.(*EpisodeMetadata))
@@ -154,7 +154,7 @@ func _EpisodeMetadata_GetTrendingPodcasts_Handler(srv interface{}, ctx context.C
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/episode_metadata/GetTrendingPodcasts",
+		FullMethod: "/episode_metadata.episode_metadata/GetTrendingPodcasts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodeMetadataServer).GetTrendingPodcasts(ctx, req.(*Void))
@@ -172,7 +172,7 @@ func _EpisodeMetadata_GetRecommendedPodcasts_Handler(srv interface{}, ctx contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/episode_metadata/GetRecommendedPodcasts",
+		FullMethod: "/episode_metadata.episode_metadata/GetRecommendedPodcasts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodeMetadataServer).GetRecommendedPodcasts(ctx, req.(*ID))
@@ -190,7 +190,7 @@ func _EpisodeMetadata_GetPodcastsByGenre_Handler(srv interface{}, ctx context.Co
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/episode_metadata/GetPodcastsByGenre",
+		FullMethod: "/episode_metadata.episode_metadata/GetPodcastsByGenre",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodeMetadataServer).GetPodcastsByGenre(ctx, req.(*Genres))
@@ -208,7 +208,7 @@ func _EpisodeMetadata_SearchPodcast_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/episode_metadata/SearchPodcast",
+		FullMethod: "/episode_metadata.episode_metadata/SearchPodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodeMetadataServer).SearchPodcast(ctx, req.(*Title))
@@ -220,7 +220,7 @@ func _EpisodeMetadata_SearchPodcast_Handler(srv interface{}, ctx context.Context
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EpisodeMetadata_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "episode_metadata",
+	ServiceName: "episode_metadata.episode_metadata",
 	HandlerType: (*EpisodeMetadataServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

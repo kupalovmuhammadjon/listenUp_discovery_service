@@ -39,7 +39,7 @@ func NewUserManagementClient(cc grpc.ClientConnInterface) UserManagementClient {
 
 func (c *userManagementClient) GetUserByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/protos.UserManagement/GetUserByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/GetUserByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *userManagementClient) GetUserByID(ctx context.Context, in *ID, opts ...
 
 func (c *userManagementClient) UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/protos.UserManagement/UpdateUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *userManagementClient) UpdateUser(ctx context.Context, in *User, opts ..
 
 func (c *userManagementClient) DeleteUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/protos.UserManagement/DeleteUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/DeleteUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *userManagementClient) DeleteUser(ctx context.Context, in *ID, opts ...g
 
 func (c *userManagementClient) GetUserProfile(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Profile, error) {
 	out := new(Profile)
-	err := c.cc.Invoke(ctx, "/protos.UserManagement/GetUserProfile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/GetUserProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *userManagementClient) GetUserProfile(ctx context.Context, in *ID, opts 
 
 func (c *userManagementClient) UpdateUserProfile(ctx context.Context, in *Profile, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/protos.UserManagement/UpdateUserProfile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/UpdateUserProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _UserManagement_GetUserByID_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.UserManagement/GetUserByID",
+		FullMethod: "/user.UserManagement/GetUserByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserManagementServer).GetUserByID(ctx, req.(*ID))
@@ -154,7 +154,7 @@ func _UserManagement_UpdateUser_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.UserManagement/UpdateUser",
+		FullMethod: "/user.UserManagement/UpdateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserManagementServer).UpdateUser(ctx, req.(*User))
@@ -172,7 +172,7 @@ func _UserManagement_DeleteUser_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.UserManagement/DeleteUser",
+		FullMethod: "/user.UserManagement/DeleteUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserManagementServer).DeleteUser(ctx, req.(*ID))
@@ -190,7 +190,7 @@ func _UserManagement_GetUserProfile_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.UserManagement/GetUserProfile",
+		FullMethod: "/user.UserManagement/GetUserProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserManagementServer).GetUserProfile(ctx, req.(*ID))
@@ -208,7 +208,7 @@ func _UserManagement_UpdateUserProfile_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.UserManagement/UpdateUserProfile",
+		FullMethod: "/user.UserManagement/UpdateUserProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserManagementServer).UpdateUserProfile(ctx, req.(*Profile))
@@ -220,7 +220,7 @@ func _UserManagement_UpdateUserProfile_Handler(srv interface{}, ctx context.Cont
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserManagement_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "protos.UserManagement",
+	ServiceName: "user.UserManagement",
 	HandlerType: (*UserManagementServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
