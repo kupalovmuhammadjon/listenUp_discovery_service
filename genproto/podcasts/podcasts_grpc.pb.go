@@ -39,7 +39,7 @@ func NewPodcastsClient(cc grpc.ClientConnInterface) PodcastsClient {
 
 func (c *podcastsClient) CreatePodcast(ctx context.Context, in *PodcastCreate, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/Podcasts/CreatePodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/podcasts.Podcasts/CreatePodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *podcastsClient) CreatePodcast(ctx context.Context, in *PodcastCreate, o
 
 func (c *podcastsClient) GetPodcastById(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Podcast, error) {
 	out := new(Podcast)
-	err := c.cc.Invoke(ctx, "/Podcasts/GetPodcastById", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/podcasts.Podcasts/GetPodcastById", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *podcastsClient) GetPodcastById(ctx context.Context, in *ID, opts ...grp
 
 func (c *podcastsClient) UpdatePodcast(ctx context.Context, in *PodcastUpdate, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/Podcasts/UpdatePodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/podcasts.Podcasts/UpdatePodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *podcastsClient) UpdatePodcast(ctx context.Context, in *PodcastUpdate, o
 
 func (c *podcastsClient) DeletePodcast(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/Podcasts/DeletePodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/podcasts.Podcasts/DeletePodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *podcastsClient) DeletePodcast(ctx context.Context, in *ID, opts ...grpc
 
 func (c *podcastsClient) GetUserPodcasts(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserPodcasts, error) {
 	out := new(UserPodcasts)
-	err := c.cc.Invoke(ctx, "/Podcasts/GetUserPodcasts", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/podcasts.Podcasts/GetUserPodcasts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _Podcasts_CreatePodcast_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Podcasts/CreatePodcast",
+		FullMethod: "/podcasts.Podcasts/CreatePodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PodcastsServer).CreatePodcast(ctx, req.(*PodcastCreate))
@@ -154,7 +154,7 @@ func _Podcasts_GetPodcastById_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Podcasts/GetPodcastById",
+		FullMethod: "/podcasts.Podcasts/GetPodcastById",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PodcastsServer).GetPodcastById(ctx, req.(*ID))
@@ -172,7 +172,7 @@ func _Podcasts_UpdatePodcast_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Podcasts/UpdatePodcast",
+		FullMethod: "/podcasts.Podcasts/UpdatePodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PodcastsServer).UpdatePodcast(ctx, req.(*PodcastUpdate))
@@ -190,7 +190,7 @@ func _Podcasts_DeletePodcast_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Podcasts/DeletePodcast",
+		FullMethod: "/podcasts.Podcasts/DeletePodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PodcastsServer).DeletePodcast(ctx, req.(*ID))
@@ -208,7 +208,7 @@ func _Podcasts_GetUserPodcasts_Handler(srv interface{}, ctx context.Context, dec
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Podcasts/GetUserPodcasts",
+		FullMethod: "/podcasts.Podcasts/GetUserPodcasts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(PodcastsServer).GetUserPodcasts(ctx, req.(*ID))
@@ -220,7 +220,7 @@ func _Podcasts_GetUserPodcasts_Handler(srv interface{}, ctx context.Context, dec
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Podcasts_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Podcasts",
+	ServiceName: "podcasts.Podcasts",
 	HandlerType: (*PodcastsServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

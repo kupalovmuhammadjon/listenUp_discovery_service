@@ -38,7 +38,7 @@ func NewAuthenticationClient(cc grpc.ClientConnInterface) AuthenticationClient {
 
 func (c *authenticationClient) Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error) {
 	out := new(RegisterResponse)
-	err := c.cc.Invoke(ctx, "/protos.Authentication/Register", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/Register", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +47,7 @@ func (c *authenticationClient) Register(ctx context.Context, in *RegisterRequest
 
 func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/protos.Authentication/Login", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,7 @@ func (c *authenticationClient) Login(ctx context.Context, in *LoginRequest, opts
 
 func (c *authenticationClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
 	out := new(LogoutResponse)
-	err := c.cc.Invoke(ctx, "/protos.Authentication/Logout", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/Logout", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (c *authenticationClient) Logout(ctx context.Context, in *LogoutRequest, op
 
 func (c *authenticationClient) RefreshToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*TokenResponse, error) {
 	out := new(TokenResponse)
-	err := c.cc.Invoke(ctx, "/protos.Authentication/RefreshToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/authentication.Authentication/RefreshToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func _Authentication_Register_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.Authentication/Register",
+		FullMethod: "/authentication.Authentication/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).Register(ctx, req.(*RegisterRequest))
@@ -140,7 +140,7 @@ func _Authentication_Login_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.Authentication/Login",
+		FullMethod: "/authentication.Authentication/Login",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).Login(ctx, req.(*LoginRequest))
@@ -158,7 +158,7 @@ func _Authentication_Logout_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.Authentication/Logout",
+		FullMethod: "/authentication.Authentication/Logout",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).Logout(ctx, req.(*LogoutRequest))
@@ -176,7 +176,7 @@ func _Authentication_RefreshToken_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protos.Authentication/RefreshToken",
+		FullMethod: "/authentication.Authentication/RefreshToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthenticationServer).RefreshToken(ctx, req.(*TokenRequest))
@@ -188,7 +188,7 @@ func _Authentication_RefreshToken_Handler(srv interface{}, ctx context.Context, 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Authentication_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "protos.Authentication",
+	ServiceName: "authentication.Authentication",
 	HandlerType: (*AuthenticationServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
