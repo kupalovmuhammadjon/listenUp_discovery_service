@@ -39,7 +39,7 @@ func NewEpisodesServiceClient(cc grpc.ClientConnInterface) EpisodesServiceClient
 
 func (c *episodesServiceClient) CreatePodcastEpisode(ctx context.Context, in *EpisodeCreate, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
-	err := c.cc.Invoke(ctx, "/EpisodesService/CreatePodcastEpisode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episodes.EpisodesService/CreatePodcastEpisode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (c *episodesServiceClient) CreatePodcastEpisode(ctx context.Context, in *Ep
 
 func (c *episodesServiceClient) GetEpisodesByPodcastId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Episodes, error) {
 	out := new(Episodes)
-	err := c.cc.Invoke(ctx, "/EpisodesService/GetEpisodesByPodcastId", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episodes.EpisodesService/GetEpisodesByPodcastId", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *episodesServiceClient) GetEpisodesByPodcastId(ctx context.Context, in *
 
 func (c *episodesServiceClient) UpdateEpisode(ctx context.Context, in *IDs, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/EpisodesService/UpdateEpisode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episodes.EpisodesService/UpdateEpisode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func (c *episodesServiceClient) UpdateEpisode(ctx context.Context, in *IDs, opts
 
 func (c *episodesServiceClient) DeleteEpisode(ctx context.Context, in *IDsForDelete, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
-	err := c.cc.Invoke(ctx, "/EpisodesService/DeleteEpisode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episodes.EpisodesService/DeleteEpisode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +75,7 @@ func (c *episodesServiceClient) DeleteEpisode(ctx context.Context, in *IDsForDel
 
 func (c *episodesServiceClient) PublishPodcast(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Success, error) {
 	out := new(Success)
-	err := c.cc.Invoke(ctx, "/EpisodesService/PublishPodcast", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/episodes.EpisodesService/PublishPodcast", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func _EpisodesService_CreatePodcastEpisode_Handler(srv interface{}, ctx context.
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EpisodesService/CreatePodcastEpisode",
+		FullMethod: "/episodes.EpisodesService/CreatePodcastEpisode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodesServiceServer).CreatePodcastEpisode(ctx, req.(*EpisodeCreate))
@@ -154,7 +154,7 @@ func _EpisodesService_GetEpisodesByPodcastId_Handler(srv interface{}, ctx contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EpisodesService/GetEpisodesByPodcastId",
+		FullMethod: "/episodes.EpisodesService/GetEpisodesByPodcastId",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodesServiceServer).GetEpisodesByPodcastId(ctx, req.(*ID))
@@ -172,7 +172,7 @@ func _EpisodesService_UpdateEpisode_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EpisodesService/UpdateEpisode",
+		FullMethod: "/episodes.EpisodesService/UpdateEpisode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodesServiceServer).UpdateEpisode(ctx, req.(*IDs))
@@ -190,7 +190,7 @@ func _EpisodesService_DeleteEpisode_Handler(srv interface{}, ctx context.Context
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EpisodesService/DeleteEpisode",
+		FullMethod: "/episodes.EpisodesService/DeleteEpisode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodesServiceServer).DeleteEpisode(ctx, req.(*IDsForDelete))
@@ -208,7 +208,7 @@ func _EpisodesService_PublishPodcast_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/EpisodesService/PublishPodcast",
+		FullMethod: "/episodes.EpisodesService/PublishPodcast",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(EpisodesServiceServer).PublishPodcast(ctx, req.(*ID))
@@ -220,7 +220,7 @@ func _EpisodesService_PublishPodcast_Handler(srv interface{}, ctx context.Contex
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var EpisodesService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "EpisodesService",
+	ServiceName: "episodes.EpisodesService",
 	HandlerType: (*EpisodesServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
