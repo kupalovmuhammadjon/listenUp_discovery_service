@@ -8,6 +8,7 @@ import (
 	pbp "discovery_service/genproto/podcasts"
 	pbu "discovery_service/genproto/user"
 	pb "discovery_service/genproto/user_interactions"
+	"discovery_service/pkg"
 	"discovery_service/storage/postgres"
 	"fmt"
 )
@@ -21,8 +22,12 @@ type UserInterService struct {
 }
 
 func NewUserInterService(db *sql.DB, cfg *config.Config) *UserInterService {
+
 	return &UserInterService{
 		Repo: postgres.NewUserInterRepo(db),
+		UserClient: pkg.CreateUserManagementClient(cfg),
+		PodcastClient: pkg.NewPodcastsClient(cfg),
+		EpisodeClient: pkg.NewEpisodesClient(cfg),
 	}
 }
 

@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	HTTP_PORT                  int
+	USER_SERVICE_PORT          string
 	DISCOVERY_SERVICE_PORT     string
 	PODCAST_SERVICE_PORT       string
 	EPISODE_SERVICE_PORT       string
