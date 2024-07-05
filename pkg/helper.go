@@ -26,7 +26,7 @@ func CreatePodcastClient() (pbPodcast.PodcastsClient, error) {
 
 func CreateEpisodesClient() (pbEpisode.EpisodesServiceClient, error) {
 	config := config.Load()
-	conn, err := grpc.NewClient(config.EPISODE_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(config.PODCAST_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, errors.New("failed to connect to the address: " + err.Error())
 	}
