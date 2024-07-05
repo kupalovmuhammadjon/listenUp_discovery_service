@@ -21,8 +21,8 @@ type UserInterService struct {
 	EpisodeClient pbe.EpisodesServiceClient
 }
 
-func NewUserInterService(db *sql.DB, cfg *config.Config) *UserInterService {
-
+func NewUserInterService(db *sql.DB) *UserInterService {
+	cfg := config.Load()
 	return &UserInterService{
 		Repo:          postgres.NewUserInterRepo(db),
 		UserClient:    pkg.CreateUserManagementClient(cfg),
