@@ -13,6 +13,23 @@ func NewUserInterRepo(db *sql.DB) *UserInterRepo {
 	return &UserInterRepo{Db: db}
 }
 
+func (u *UserInterRepo) ValidateUserInteractionId(id string) (bool, error) {
+	query := `
+	select
+      	case 
+        	when id = $1 then true
+      	else
+        	false
+      	end
+    from
+      	user_interactions
+	`
+	var exists bool
+	err := u.Db.QueryRow(query, id).Scan(&exists)
+
+	return exists, err
+}
+
 func (u *UserInterRepo) LikeEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID, error) {
 	
 	tr, err := u.Db.Begin()

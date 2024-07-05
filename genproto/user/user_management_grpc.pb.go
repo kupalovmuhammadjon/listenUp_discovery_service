@@ -27,6 +27,7 @@ type UserManagementClient interface {
 	DeleteUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
 	GetUserProfile(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Profile, error)
 	UpdateUserProfile(ctx context.Context, in *Profile, opts ...grpc.CallOption) (*Void, error)
+	ValidateUserId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Success, error)
 }
 
 type userManagementClient struct {
@@ -82,6 +83,15 @@ func (c *userManagementClient) UpdateUserProfile(ctx context.Context, in *Profil
 	return out, nil
 }
 
+func (c *userManagementClient) ValidateUserId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Success, error) {
+	out := new(Success)
+	err := c.cc.Invoke(ctx, "/user.UserManagement/ValidateUserId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserManagementServer is the server API for UserManagement service.
 // All implementations must embed UnimplementedUserManagementServer
 // for forward compatibility
@@ -91,6 +101,7 @@ type UserManagementServer interface {
 	DeleteUser(context.Context, *ID) (*Void, error)
 	GetUserProfile(context.Context, *ID) (*Profile, error)
 	UpdateUserProfile(context.Context, *Profile) (*Void, error)
+	ValidateUserId(context.Context, *ID) (*Success, error)
 	mustEmbedUnimplementedUserManagementServer()
 }
 
@@ -112,6 +123,9 @@ func (UnimplementedUserManagementServer) GetUserProfile(context.Context, *ID) (*
 }
 func (UnimplementedUserManagementServer) UpdateUserProfile(context.Context, *Profile) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUserProfile not implemented")
+}
+func (UnimplementedUserManagementServer) ValidateUserId(context.Context, *ID) (*Success, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateUserId not implemented")
 }
 func (UnimplementedUserManagementServer) mustEmbedUnimplementedUserManagementServer() {}
 
@@ -216,6 +230,24 @@ func _UserManagement_UpdateUserProfile_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserManagement_ValidateUserId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementServer).ValidateUserId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user.UserManagement/ValidateUserId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementServer).ValidateUserId(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserManagement_ServiceDesc is the grpc.ServiceDesc for UserManagement service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -242,6 +274,10 @@ var UserManagement_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateUserProfile",
 			Handler:    _UserManagement_UpdateUserProfile_Handler,
+		},
+		{
+			MethodName: "ValidateUserId",
+			Handler:    _UserManagement_ValidateUserId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

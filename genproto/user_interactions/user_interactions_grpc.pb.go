@@ -25,6 +25,7 @@ type UserInteractionsClient interface {
 	LikeEpisodeOfPodcast(ctx context.Context, in *InteractEpisode, opts ...grpc.CallOption) (*ID, error)
 	DeleteLikeFromEpisodeOfPodcast(ctx context.Context, in *DeleteLike, opts ...grpc.CallOption) (*Success, error)
 	ListenEpisodeOfPodcast(ctx context.Context, in *InteractEpisode, opts ...grpc.CallOption) (*ID, error)
+	ValidateUserInteractionId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Success, error)
 }
 
 type userInteractionsClient struct {
@@ -62,6 +63,15 @@ func (c *userInteractionsClient) ListenEpisodeOfPodcast(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *userInteractionsClient) ValidateUserInteractionId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Success, error) {
+	out := new(Success)
+	err := c.cc.Invoke(ctx, "/user_interactions.user_interactions/ValidateUserInteractionId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserInteractionsServer is the server API for UserInteractions service.
 // All implementations must embed UnimplementedUserInteractionsServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type UserInteractionsServer interface {
 	LikeEpisodeOfPodcast(context.Context, *InteractEpisode) (*ID, error)
 	DeleteLikeFromEpisodeOfPodcast(context.Context, *DeleteLike) (*Success, error)
 	ListenEpisodeOfPodcast(context.Context, *InteractEpisode) (*ID, error)
+	ValidateUserInteractionId(context.Context, *ID) (*Success, error)
 	mustEmbedUnimplementedUserInteractionsServer()
 }
 
@@ -84,6 +95,9 @@ func (UnimplementedUserInteractionsServer) DeleteLikeFromEpisodeOfPodcast(contex
 }
 func (UnimplementedUserInteractionsServer) ListenEpisodeOfPodcast(context.Context, *InteractEpisode) (*ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListenEpisodeOfPodcast not implemented")
+}
+func (UnimplementedUserInteractionsServer) ValidateUserInteractionId(context.Context, *ID) (*Success, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateUserInteractionId not implemented")
 }
 func (UnimplementedUserInteractionsServer) mustEmbedUnimplementedUserInteractionsServer() {}
 
@@ -152,6 +166,24 @@ func _UserInteractions_ListenEpisodeOfPodcast_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserInteractions_ValidateUserInteractionId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserInteractionsServer).ValidateUserInteractionId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/user_interactions.user_interactions/ValidateUserInteractionId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserInteractionsServer).ValidateUserInteractionId(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserInteractions_ServiceDesc is the grpc.ServiceDesc for UserInteractions service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -170,6 +202,10 @@ var UserInteractions_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListenEpisodeOfPodcast",
 			Handler:    _UserInteractions_ListenEpisodeOfPodcast_Handler,
+		},
+		{
+			MethodName: "ValidateUserInteractionId",
+			Handler:    _UserInteractions_ValidateUserInteractionId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
