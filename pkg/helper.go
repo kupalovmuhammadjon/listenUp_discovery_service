@@ -2,60 +2,74 @@ package pkg
 
 import (
 	"discovery_service/config"
-	pbCollaboration "discovery_service/genproto/collaborations"
+	pbCollab "discovery_service/genproto/collaborations"
 	pbComment "discovery_service/genproto/comments"
-	pbEpisode "discovery_service/genproto/episodes"
-	pbPodcast "discovery_service/genproto/podcasts"
+	pbe "discovery_service/genproto/episodes"
+	pbp "discovery_service/genproto/podcasts"
+	pbu "discovery_service/genproto/user"
 	"errors"
+	"log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CreatePodcastClient() (pbPodcast.PodcastsClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.PODCAST_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func CreateUserManagementClient(cfg *config.Config) pbu.UserManagementClient {
+	conn, err := grpc.NewClient(cfg.USER_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
+		return nil
 	}
 	defer conn.Close()
 
-	client := pbPodcast.NewPodcastsClient(conn)
-	return client, nil
+	return pbu.NewUserManagementClient(conn)
 }
 
-func CreateEpisodesClient() (pbEpisode.EpisodesServiceClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.PODCAST_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func CreatePodcastsClient(cfg *config.Config) pbp.PodcastsClient {
+	conn, err := grpc.NewClient(cfg.PODCAST_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
+		return nil
 	}
 	defer conn.Close()
 
-	client := pbEpisode.NewEpisodesServiceClient(conn)
-	return client, nil
+	return pbp.NewPodcastsClient(conn)
 }
 
-func CreateCollaborationsClient() (pbCollaboration.CollaborationsClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.COLLABORATION_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func CreateEpisodesClient(cfg *config.Config) pbe.EpisodesServiceClient {
+	conn, err := grpc.NewClient(cfg.PODCAST_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
+		return nil
 	}
 	defer conn.Close()
 
-	client := pbCollaboration.NewCollaborationsClient(conn)
-	return client, nil
+	return pbe.NewEpisodesServiceClient(conn)
 }
 
-func CreateCommentsClient() (pbComment.CommentsClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.COLLABORATION_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func CreateCollaborationsClient(cfg *config.Config) pbCollab.CollaborationsClient {
+	conn, err := grpc.NewClient(cfg.COLLABORATION_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
+		return nil
 	}
 	defer conn.Close()
 
-	client := pbComment.NewCommentsClient(conn)
-	return client, nil
+	return pbCollab.NewCollaborationsClient(conn)
+}
+
+func CreateCommentsClient(cfg *config.Config) pbComment.CommentsClient {
+	conn, err := grpc.NewClient(cfg.COLLABORATION_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
+		return nil
+	}
+	defer conn.Close()
+
+	return pbComment.NewCommentsClient(conn)
 }

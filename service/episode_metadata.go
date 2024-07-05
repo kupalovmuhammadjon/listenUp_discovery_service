@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"database/sql"
+	"discovery_service/config"
 	pbc "discovery_service/genproto/collaborations"
 	pbcom "discovery_service/genproto/comments"
 	pb "discovery_service/genproto/episode_metadata"
 	pbe "discovery_service/genproto/episodes"
 	pbp "discovery_service/genproto/podcasts"
 	"discovery_service/pkg"
-	"log"
 
 	"discovery_service/storage/postgres"
 )
@@ -24,23 +24,14 @@ type EpisodeMetadataService struct {
 }
 
 func GetArgumentOfEpisodeMetadate(db *sql.DB) (*postgres.EpisodeMetadataRepo, pbp.PodcastsClient, pbe.EpisodesServiceClient, pbc.CollaborationsClient, pbcom.CommentsClient) {
+	cfg := config.Load()
 	episodeMetadataRepo := postgres.NewEpisodeMetadataRepo(db)
-	ClientPodcasts, err := pkg.CreatePodcastClient()
-	if err != nil {
-		log.Println(err)
-	}
-	ClientEpisodes, err := pkg.CreateEpisodesClient()
-	if err != nil {
-		log.Println(err)
-	}
-	ClientCollaborations, err := pkg.CreateCollaborationsClient()
-	if err != nil {
-		log.Println(err)
-	}
-	ClientComments, err := pkg.CreateCommentsClient()
-	if err != nil {
-		log.Println(err)
-	}
+	ClientPodcasts := pkg.CreatePodcastsClient(cfg)
+
+	ClientEpisodes := pkg.CreateEpisodesClient(cfg)
+
+	ClientCollaborations := pkg.CreateCollaborationsClient(cfg)
+	ClientComments := pkg.CreateCommentsClient(cfg)
 
 	return episodeMetadataRepo, ClientPodcasts, ClientEpisodes, ClientCollaborations, ClientComments
 }
@@ -62,8 +53,8 @@ func (e *EpisodeMetadataService) CreateEpisodeMetaData(ctx context.Context, epis
 	return &pb.Void{}, err
 }
 
-func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *pb.Void) (*pb.Podcasts, error) {
-	podcasts, err := e.Repo.GetTrendingPodcasts()
+func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *pb.Pagination) (*pb.Podcasts, error) {
+	podcasts, err := e.Repo.GetTrendingPodcasts(req)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +76,8 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *p
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, userId *pb.ID) (*pb.Podcasts, error) {
-	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(userId)
+func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, req *pb.IdPage) (*pb.Podcasts, error) {
+	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(&pb.ID{Id: req.Id})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +88,7 @@ func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, use
 		return nil, err
 	}
 
-	podcasts, err := e.Repo.GetRecommendedPodcasts(&podcastsId.PodcastsId)
+	podcasts, err := e.Repo.GetRecommendedPodcasts(podcastsId.PodcastsId[0], req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +113,8 @@ func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, use
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres *pb.Genres) (*pb.Podcasts, error) {
-	podcastsInfo, err := e.Repo.GetPodcastsByGenre(genres)
+func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Filter) (*pb.Podcasts, error) {
+	podcastsInfo, err := e.Repo.GetPodcastsByGenre(req)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +126,7 @@ func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres 
 			return nil, err
 		}
 
-		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.ID{Id: p.PodcastId})
+		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.Filter{Id: p.PodcastId})
 		if err != nil {
 			return nil, err
 		}
@@ -165,48 +156,39 @@ func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres 
 	return &pb.Podcasts{Podcasts: resp}, nil
 }
 
-func (e *EpisodeMetadataService) SearchPodcast(ctx context.Context, titles *pb.Title) (*pb.Podcasts, error) {
-	podcastsInfo, err := e.Repo.SearchPodcast(titles)
+func (e *EpisodeMetadataService) SearchEpisode(ctx context.Context, req *pb.Title) (*pb.Episode, error) {
+	resp, err := e.EpisodeClient.SearchEpisodeByTitle(context.Background(), &pbe.Title{Title: req.EpisodeTitle})
 	if err != nil {
 		return nil, err
 	}
 
-	var resp []*pb.Podcast
-	for _, p := range podcastsInfo {
-		pod, err := e.PodcastClient.GetPodcastById(context.Background(), &pbp.ID{Id: p.PodcastId})
-		if err != nil {
-			return nil, err
-		}
-		if pod.Title != titles.PodcastTitle {
-			continue
-		}
-
-		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.ID{Id: p.PodcastId})
-		if err != nil {
-			return nil, err
-		}
-
-		var commentCount int64
-		for _, ep := range episodes.Episodes {
-			count, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{EpisodeId: ep.Id, PodcastId: p.PodcastId})
-			if err != nil {
-				return nil, err
-			}
-			commentCount += count.Count
-		}
-
-		resp = append(resp, &pb.Podcast{
-			PodcastId:    p.PodcastId,
-			PodcastTitle: pod.Title,
-			Genre:        p.Genre,
-			Tags:         p.Tags,
-			CommentCount: commentCount,
-			ListenCount:  p.ListenCount,
-			LikeCount:    p.LikeCount,
-			CreatedAt:    pod.CreatedAt,
-			UpdatedAt:    pod.UpdatedAt,
-		})
+	listens, likes, err := e.Repo.GetListensAndLikes(resp.Id)
+	if err != nil {
+		return nil, err
 	}
 
-	return &pb.Podcasts{Podcasts: resp}, nil
+	comments, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{
+		EpisodeId: resp.Id,
+		PodcastId: resp.PodcastId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Episode{
+		Id:           resp.Id,
+		PodcastId:    resp.PodcastId,
+		UserId:       resp.UserId,
+		Title:        resp.Title,
+		FileAudio:    resp.FileAudio,
+		Description:  resp.Description,
+		Duration:     resp.Duration,
+		Genre:        resp.Genre,
+		Tags:         resp.Tags,
+		ListenCount:  int64(listens),
+		LikeCount:    int64(likes),
+		CommentCount: comments.Count,
+		CreatedAt:    resp.CreatedAt,
+		UpdatedAt:    resp.UpdatedAt,
+	}, nil
 }

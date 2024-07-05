@@ -28,6 +28,8 @@ type CollaborationsClient interface {
 	UpdateCollaboratorByPodcastId(ctx context.Context, in *UpdateCollaborator, opts ...grpc.CallOption) (*Void, error)
 	DeleteCollaboratorByPodcastId(ctx context.Context, in *Ids, opts ...grpc.CallOption) (*Void, error)
 	GetAllPodcastsUsersWorkedOn(ctx context.Context, in *PodcastsId, opts ...grpc.CallOption) (*PodcastsId, error)
+	ValidateInvitationId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Exists, error)
+	ValidateCollaborationId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Exists, error)
 }
 
 type collaborationsClient struct {
@@ -92,6 +94,24 @@ func (c *collaborationsClient) GetAllPodcastsUsersWorkedOn(ctx context.Context, 
 	return out, nil
 }
 
+func (c *collaborationsClient) ValidateInvitationId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Exists, error) {
+	out := new(Exists)
+	err := c.cc.Invoke(ctx, "/collaborations.Collaborations/ValidateInvitationId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *collaborationsClient) ValidateCollaborationId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Exists, error) {
+	out := new(Exists)
+	err := c.cc.Invoke(ctx, "/collaborations.Collaborations/ValidateCollaborationId", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CollaborationsServer is the server API for Collaborations service.
 // All implementations must embed UnimplementedCollaborationsServer
 // for forward compatibility
@@ -102,6 +122,8 @@ type CollaborationsServer interface {
 	UpdateCollaboratorByPodcastId(context.Context, *UpdateCollaborator) (*Void, error)
 	DeleteCollaboratorByPodcastId(context.Context, *Ids) (*Void, error)
 	GetAllPodcastsUsersWorkedOn(context.Context, *PodcastsId) (*PodcastsId, error)
+	ValidateInvitationId(context.Context, *ID) (*Exists, error)
+	ValidateCollaborationId(context.Context, *ID) (*Exists, error)
 	mustEmbedUnimplementedCollaborationsServer()
 }
 
@@ -126,6 +148,12 @@ func (UnimplementedCollaborationsServer) DeleteCollaboratorByPodcastId(context.C
 }
 func (UnimplementedCollaborationsServer) GetAllPodcastsUsersWorkedOn(context.Context, *PodcastsId) (*PodcastsId, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllPodcastsUsersWorkedOn not implemented")
+}
+func (UnimplementedCollaborationsServer) ValidateInvitationId(context.Context, *ID) (*Exists, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateInvitationId not implemented")
+}
+func (UnimplementedCollaborationsServer) ValidateCollaborationId(context.Context, *ID) (*Exists, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateCollaborationId not implemented")
 }
 func (UnimplementedCollaborationsServer) mustEmbedUnimplementedCollaborationsServer() {}
 
@@ -248,6 +276,42 @@ func _Collaborations_GetAllPodcastsUsersWorkedOn_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Collaborations_ValidateInvitationId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollaborationsServer).ValidateInvitationId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/collaborations.Collaborations/ValidateInvitationId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollaborationsServer).ValidateInvitationId(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Collaborations_ValidateCollaborationId_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollaborationsServer).ValidateCollaborationId(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/collaborations.Collaborations/ValidateCollaborationId",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollaborationsServer).ValidateCollaborationId(ctx, req.(*ID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Collaborations_ServiceDesc is the grpc.ServiceDesc for Collaborations service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +342,14 @@ var Collaborations_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllPodcastsUsersWorkedOn",
 			Handler:    _Collaborations_GetAllPodcastsUsersWorkedOn_Handler,
+		},
+		{
+			MethodName: "ValidateInvitationId",
+			Handler:    _Collaborations_ValidateInvitationId_Handler,
+		},
+		{
+			MethodName: "ValidateCollaborationId",
+			Handler:    _Collaborations_ValidateCollaborationId_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
