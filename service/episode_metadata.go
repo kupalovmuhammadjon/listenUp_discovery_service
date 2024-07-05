@@ -135,7 +135,7 @@ func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres 
 			return nil, err
 		}
 
-		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.ID{Id: p.PodcastId})
+		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.Filter{Id: p.PodcastId})
 		if err != nil {
 			return nil, err
 		}
@@ -165,48 +165,39 @@ func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres 
 	return &pb.Podcasts{Podcasts: resp}, nil
 }
 
-func (e *EpisodeMetadataService) SearchPodcast(ctx context.Context, titles *pb.Title) (*pb.Podcasts, error) {
-	podcastsInfo, err := e.Repo.SearchPodcast(titles)
+func (e *EpisodeMetadataService) SearchEpisode(ctx context.Context, req *pb.Title) (*pb.Episode, error) {
+	resp, err := e.EpisodeClient.SearchEpisodeByTitle(context.Background(), &pbe.Title{Title: req.EpisodeTitle})
 	if err != nil {
 		return nil, err
 	}
 
-	var resp []*pb.Podcast
-	for _, p := range podcastsInfo {
-		pod, err := e.PodcastClient.GetPodcastById(context.Background(), &pbp.ID{Id: p.PodcastId})
-		if err != nil {
-			return nil, err
-		}
-		if pod.Title != titles.PodcastTitle {
-			continue
-		}
-
-		episodes, err := e.EpisodeClient.GetEpisodesByPodcastId(context.Background(), &pbe.ID{Id: p.PodcastId})
-		if err != nil {
-			return nil, err
-		}
-
-		var commentCount int64
-		for _, ep := range episodes.Episodes {
-			count, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{EpisodeId: ep.Id, PodcastId: p.PodcastId})
-			if err != nil {
-				return nil, err
-			}
-			commentCount += count.Count
-		}
-
-		resp = append(resp, &pb.Podcast{
-			PodcastId:    p.PodcastId,
-			PodcastTitle: pod.Title,
-			Genre:        p.Genre,
-			Tags:         p.Tags,
-			CommentCount: commentCount,
-			ListenCount:  p.ListenCount,
-			LikeCount:    p.LikeCount,
-			CreatedAt:    pod.CreatedAt,
-			UpdatedAt:    pod.UpdatedAt,
-		})
+	listens, likes, err := e.Repo.GetListensAndLikes(resp.Id)
+	if err != nil {
+		return nil, err
 	}
 
-	return &pb.Podcasts{Podcasts: resp}, nil
+	comments, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{
+		EpisodeId: resp.Id,
+		PodcastId: resp.PodcastId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.Episode{
+		Id:           resp.Id,
+		PodcastId:    resp.PodcastId,
+		UserId:       resp.UserId,
+		Title:        resp.Title,
+		FileAudio:    resp.FileAudio,
+		Description:  resp.Description,
+		Duration:     resp.Duration,
+		Genre:        resp.Genre,
+		Tags:         resp.Tags,
+		ListenCount:  int64(listens),
+		LikeCount:    int64(likes),
+		CommentCount: comments.Count,
+		CreatedAt:    resp.CreatedAt,
+		UpdatedAt:    resp.UpdatedAt,
+	}, nil
 }

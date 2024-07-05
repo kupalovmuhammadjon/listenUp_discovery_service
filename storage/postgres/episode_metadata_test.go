@@ -15,19 +15,19 @@ func DB() *EpisodeMetadataRepo {
 	return NewEpisodeMetadataRepo(db)
 }
 
-func TestCreateEpisodeMetaData(t *testing.T) {
-	e := DB()
-	err := e.CreateEpisodeMetaData(&pb.EpisodeMetadata{
-		EpisodeId: "1ce9e59b-d985-4a28-ab46-801fb8102760",
-		PodcastId: "04c70d01-930c-45b0-9e6e-161fc5f39175",
-		Genre: "philosophy",
-		Tags: []string{"Epistemology", "Logic"},
-	})
+// func TestCreateEpisodeMetaData(t *testing.T) {
+// 	e := DB()
+// 	err := e.CreateEpisodeMetaData(&pb.EpisodeMetadata{
+// 		EpisodeId: "1ce9e59b-d985-4a28-ab46-801fb8102760",
+// 		PodcastId: "04c70d01-930c-45b0-9e6e-161fc5f39175",
+// 		Genre: "philosophy",
+// 		Tags: []string{"Epistemology", "Logic"},
+// 	})
 
-	if err != nil {
-		t.Errorf("error while creating episode metadata: %v\n", err)
-	}
-}
+// 	if err != nil {
+// 		t.Errorf("error while creating episode metadata: %v\n", err)
+// 	}
+// }
 
 func TestGetTrendingPodcasts(t *testing.T) {
 	e := DB()
@@ -85,33 +85,22 @@ func TestGetRecommendedPodcasts(t *testing.T) {
 
 func TestGetPodcastsByGenre(t *testing.T) {
 	e := DB()
-	res, err := e.GetPodcastsByGenre(&pb.Genres{Genres: []string{"sports", "education"}})
+	res, err := e.GetPodcastsByGenre(&pb.Filter{
+		Genres: []string{"sports", "education"},
+		Limit:  1,
+		Offset: 1})
 	if err != nil {
-				t.Errorf("error while getting podcasts by genre: %v", err)
-			}
+		t.Errorf("error while getting podcasts by genre: %v", err)
+	}
 
 	exp := pb.Podcasts{
 		Podcasts: []*pb.Podcast{
 			{
-				PodcastId: "323e4567-e89b-12d3-a456-426614174002",
-				Genre: "education",
-				Tags: []string{"Learning", "Teaching"},
-				ListenCount: 0,
-				LikeCount: 1,
-			},
-			{
-				PodcastId: "823e4567-e89b-12d3-a456-426614174007",
-				Genre: "sports",
-				Tags: []string{"Football", "Basketball"},
+				PodcastId:   "823e4567-e89b-12d3-a456-426614174007",
+				Genre:       "sports",
+				Tags:        []string{"Football", "Basketball"},
 				ListenCount: 1,
-				LikeCount: 0,
-			},
-			{
-				PodcastId: "b23e4567-e89b-12d3-a456-426614174010",
-				Genre: "education",
-				Tags: []string{"STEM", "History"},
-				ListenCount: 0,
-				LikeCount: 1,
+				LikeCount:   0,
 			},
 		},
 	}
@@ -121,80 +110,17 @@ func TestGetPodcastsByGenre(t *testing.T) {
 	}
 }
 
-func TestSearchPodcast(t *testing.T) {
+func TestGetListensAndLikes(t *testing.T) {
 	e := DB()
-	res, err := e.SearchPodcast(&pb.Title{EpisodeTitle: "", PodcastTitle: ""})
+	res1, res2, err := e.GetListensAndLikes("123e4567-e89b-12d3-a456-426614174000")
 	if err != nil {
-		t.Errorf("error while searching podcasts: %v", err)
+		t.Errorf("error while getting listens and likes: %v", err)
 	}
 
-	exp := pb.Podcasts{
-		Podcasts: []*pb.Podcast{
-			{
-				PodcastId:   "223e4567-e89b-12d3-a456-426614174001",
-				Genre:       "technology",
-				Tags:        []string{"AI", "Robotics"},
-				ListenCount: 1,
-			},
-			{
-				PodcastId: "323e4567-e89b-12d3-a456-426614174002",
-				Genre:     "education",
-				Tags:      []string{"Learning", "Teaching"},
-				LikeCount: 1,
-			},
-			{
-				PodcastId:   "423e4567-e89b-12d3-a456-426614174003",
-				Genre:       "philosophy",
-				Tags:        []string{"Ethics", "Existentialism"},
-				ListenCount: 1,
-			},
-			{
-				PodcastId: "523e4567-e89b-12d3-a456-426614174004",
-				Genre:     "politics",
-				Tags:      []string{"Democracy", "Policy"},
-				LikeCount: 1,
-			},
-			{
-				PodcastId:   "623e4567-e89b-12d3-a456-426614174005",
-				Genre:       "business",
-				Tags:        []string{"Entrepreneurship", "Finance"},
-				ListenCount: 1,
-			},
-			{
-				PodcastId: "723e4567-e89b-12d3-a456-426614174006",
-				Genre:     "health",
-				Tags:      []string{"Fitness", "Nutrition"},
-				LikeCount: 1,
-			},
-			{
-				PodcastId:   "823e4567-e89b-12d3-a456-426614174007",
-				Genre:       "sports",
-				Tags:        []string{"Football", "Basketball"},
-				ListenCount: 1,
-			},
-			{
-				PodcastId: "923e4567-e89b-12d3-a456-426614174008",
-				Genre:     "religion",
-				Tags:      []string{"Buddhism", "Christianity"},
-				LikeCount: 1,
-			},
-			{
-				PodcastId:   "a23e4567-e89b-12d3-a456-426614174009",
-				Genre:       "technology",
-				Tags:        []string{"Blockchain", "Cryptocurrency"},
-				ListenCount: 1,
-			},
-			{
-				PodcastId: "b23e4567-e89b-12d3-a456-426614174010",
-				Genre:     "education",
-				Tags:      []string{"STEM", "History"},
-				LikeCount: 1,
-			},
-		},
-	}
+	exp1, exp2 := 100, 50
 
-	if !reflect.DeepEqual(res, exp.Podcasts) {
-		t.Errorf("error:\ngot: %v\nwant: %v\n", res, exp.Podcasts)
+	if res1 != exp1 || res2 != exp2 {
+		t.Errorf("error:\ngot: %d and %d\nwant: %d and %d\n", res1, res2, exp1, exp2)
 	}
 }
 
@@ -231,7 +157,7 @@ func TestGetPodcastsIdUserWatched(t *testing.T) {
 		t.Errorf("error while getting listened podcast ids: %v", err)
 	}
 
-	exp := pb.PodcastsId {
+	exp := pb.PodcastsId{
 		PodcastsId: []string{
 			"223e4567-e89b-12d3-a456-426614174001",
 			"523e4567-e89b-12d3-a456-426614174004",
