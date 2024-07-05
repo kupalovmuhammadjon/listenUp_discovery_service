@@ -10,7 +10,6 @@ import (
 	pbe "discovery_service/genproto/episodes"
 	pbp "discovery_service/genproto/podcasts"
 	"discovery_service/pkg"
-	"log"
 
 	"discovery_service/storage/postgres"
 )
@@ -31,14 +30,9 @@ func GetArgumentOfEpisodeMetadate(db *sql.DB) (*postgres.EpisodeMetadataRepo, pb
 
 	ClientEpisodes := pkg.CreateEpisodesClient(cfg)
 
-	ClientCollaborations, err := pkg.CreateCollaborationsClient()
-	if err != nil {
-		log.Println(err)
-	}
-	ClientComments, err := pkg.CreateCommentsClient()
-	if err != nil {
-		log.Println(err)
-	}
+	ClientCollaborations := pkg.CreateCollaborationsClient(cfg)
+
+	ClientComments := pkg.CreateCommentsClient(cfg)
 
 	return episodeMetadataRepo, ClientPodcasts, ClientEpisodes, ClientCollaborations, ClientComments
 }
