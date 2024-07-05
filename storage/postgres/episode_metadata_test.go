@@ -31,7 +31,7 @@ func DB() *EpisodeMetadataRepo {
 
 func TestGetTrendingPodcasts(t *testing.T) {
 	e := DB()
-	res, err := e.GetTrendingPodcasts()
+	res, err := e.GetTrendingPodcasts(&pb.Pagination{})
 	if err != nil {
 		t.Errorf("error while getting trending podcasts: %v", err)
 	}
@@ -59,9 +59,8 @@ func TestGetTrendingPodcasts(t *testing.T) {
 
 func TestGetRecommendedPodcasts(t *testing.T) {
 	e := DB()
-	res, err := e.GetRecommendedPodcasts(&[]string{
-		"823e4567-e89b-12d3-a456-426614174007",
-	})
+	res, err := e.GetRecommendedPodcasts("823e4567-e89b-12d3-a456-426614174007",
+		&pb.Pagination{})
 	if err != nil {
 		t.Errorf("error while getting recommended podcasts: %v", err)
 	}
@@ -86,9 +85,8 @@ func TestGetRecommendedPodcasts(t *testing.T) {
 func TestGetPodcastsByGenre(t *testing.T) {
 	e := DB()
 	res, err := e.GetPodcastsByGenre(&pb.Filter{
-		Genres: []string{"sports", "education"},
-		Limit:  1,
-		Offset: 1})
+		Genres:     []string{"sports", "education"},
+		Pagination: &pb.Pagination{Limit: 1, Offset: 1}})
 	if err != nil {
 		t.Errorf("error while getting podcasts by genre: %v", err)
 	}

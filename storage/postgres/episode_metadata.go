@@ -34,7 +34,7 @@ func (e *EpisodeMetadataRepo) CreateEpisodeMetaData(epData *pb.EpisodeMetadata) 
 	return nil
 }
 
-func (e *EpisodeMetadataRepo) GetTrendingPodcasts() (*pb.Podcasts, error) {
+func (e *EpisodeMetadataRepo) GetTrendingPodcasts(p *pb.Pagination) (*pb.Podcasts, error) {
 	query := `
 	select
 	  podcast_id,
@@ -47,8 +47,10 @@ func (e *EpisodeMetadataRepo) GetTrendingPodcasts() (*pb.Podcasts, error) {
 	  created_at between current_timestamp - interval '3 months' and current_timestamp and deleted_at is null
 	order by
 	  like_count, listen_count
+	limit $1
+	offset $2
 	`
-	rows, err := e.Db.Query(query)
+	rows, err := e.Db.Query(query, p.Limit, p.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +69,7 @@ func (e *EpisodeMetadataRepo) GetTrendingPodcasts() (*pb.Podcasts, error) {
 	return &podcasts, nil
 }
 
-func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastsId *[]string) (*pb.Podcasts, error) {
+func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string, p *pb.Pagination) (*pb.Podcasts, error) {
 	query := `
 	  select
 		podcast_id, 
@@ -81,9 +83,11 @@ func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastsId *[]string) (*pb.
 		podcast_id = any($1)
 	  group by
 		podcast_id
+	limit $2
+	offset $3
 	  `
 
-	rows, err := e.Db.Query(query, pq.Array(podcastsId))
+	rows, err := e.Db.Query(query, pq.Array(podcastId), p.Limit, p.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +136,7 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	limit $2
 	offset $3`
 
-	rows, err := e.Db.Query(query, pq.Array(f.Genres), f.Limit, f.Offset)
+	rows, err := e.Db.Query(query, pq.Array(f.Genres), f.Pagination.Limit, f.Pagination.Offset)
 	if err != nil {
 		return nil, err
 	}

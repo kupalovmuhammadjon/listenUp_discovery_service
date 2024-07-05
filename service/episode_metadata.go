@@ -62,8 +62,8 @@ func (e *EpisodeMetadataService) CreateEpisodeMetaData(ctx context.Context, epis
 	return &pb.Void{}, err
 }
 
-func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *pb.Void) (*pb.Podcasts, error) {
-	podcasts, err := e.Repo.GetTrendingPodcasts()
+func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *pb.Pagination) (*pb.Podcasts, error) {
+	podcasts, err := e.Repo.GetTrendingPodcasts(req)
 	if err != nil {
 		return nil, err
 	}
@@ -85,8 +85,8 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *p
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, userId *pb.ID) (*pb.Podcasts, error) {
-	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(userId)
+func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, req *pb.IdPage) (*pb.Podcasts, error) {
+	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(&pb.ID{Id: req.Id})
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, use
 		return nil, err
 	}
 
-	podcasts, err := e.Repo.GetRecommendedPodcasts(&podcastsId.PodcastsId)
+	podcasts, err := e.Repo.GetRecommendedPodcasts(podcastsId.PodcastsId[0], req.Pagination)
 	if err != nil {
 		return nil, err
 	}
@@ -122,8 +122,8 @@ func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, use
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, genres *pb.Genres) (*pb.Podcasts, error) {
-	podcastsInfo, err := e.Repo.GetPodcastsByGenre(genres)
+func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Filter) (*pb.Podcasts, error) {
+	podcastsInfo, err := e.Repo.GetPodcastsByGenre(req)
 	if err != nil {
 		return nil, err
 	}
