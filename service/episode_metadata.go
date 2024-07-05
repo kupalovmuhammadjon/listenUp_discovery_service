@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"discovery_service/config"
 	pbc "discovery_service/genproto/collaborations"
 	pbcom "discovery_service/genproto/comments"
 	pb "discovery_service/genproto/episode_metadata"
@@ -24,15 +25,12 @@ type EpisodeMetadataService struct {
 }
 
 func GetArgumentOfEpisodeMetadate(db *sql.DB) (*postgres.EpisodeMetadataRepo, pbp.PodcastsClient, pbe.EpisodesServiceClient, pbc.CollaborationsClient, pbcom.CommentsClient) {
+	cfg := config.Load()
 	episodeMetadataRepo := postgres.NewEpisodeMetadataRepo(db)
-	ClientPodcasts, err := pkg.CreatePodcastClient()
-	if err != nil {
-		log.Println(err)
-	}
-	ClientEpisodes, err := pkg.CreateEpisodesClient()
-	if err != nil {
-		log.Println(err)
-	}
+	ClientPodcasts := pkg.CreatePodcastsClient(cfg)
+
+	ClientEpisodes := pkg.CreateEpisodesClient(cfg)
+
 	ClientCollaborations, err := pkg.CreateCollaborationsClient()
 	if err != nil {
 		log.Println(err)

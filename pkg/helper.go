@@ -4,36 +4,49 @@ import (
 	"discovery_service/config"
 	pbCollaboration "discovery_service/genproto/collaborations"
 	pbComment "discovery_service/genproto/comments"
-	pbEpisode "discovery_service/genproto/episodes"
-	pbPodcast "discovery_service/genproto/podcasts"
+	pbe "discovery_service/genproto/episodes"
+	pbp "discovery_service/genproto/podcasts"
+	pbu "discovery_service/genproto/user"
 	"errors"
+	"log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func CreatePodcastClient() (pbPodcast.PodcastsClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.PODCAST_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func CreateUserManagementClient(cfg *config.Config) pbu.UserManagementClient {
+	conn, err := grpc.NewClient(cfg.USER_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
+		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 	}
 	defer conn.Close()
 
-	client := pbPodcast.NewPodcastsClient(conn)
-	return client, nil
+	u := pbu.NewUserManagementClient(conn)
+	return u
 }
 
-func CreateEpisodesClient() (pbEpisode.EpisodesServiceClient, error) {
-	config := config.Load()
-	conn, err := grpc.NewClient(config.EPISODE_SERVICE_PORT, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		return nil, errors.New("failed to connect to the address: " + err.Error())
-	}
-	defer conn.Close()
+func CreatePodcastsClient(cfg *config.Config) pbp.PodcastsClient {
+	conn, err := grpc.NewClient(cfg.PODCAST_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
 
-	client := pbEpisode.NewEpisodesServiceClient(conn)
-	return client, nil
+	if err != nil {
+		log.Println("error while connecting podcast service ", err)
+	}
+	a := pbp.NewPodcastsClient(conn)
+
+	return a
+}
+
+func CreateEpisodesClient(cfg *config.Config) pbe.EpisodesServiceClient {
+	conn, err := grpc.NewClient(cfg.EPISODE_SERVICE_PORT,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		log.Println("error while connecting podcast service ", err)
+	}
+	a := pbe.NewEpisodesServiceClient(conn)
+
+	return a
 }
 
 func CreateCollaborationsClient() (pbCollaboration.CollaborationsClient, error) {
