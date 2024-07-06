@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
 	"fmt"
-	"strings"
 
 	"github.com/lib/pq"
 )
@@ -165,7 +164,6 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-
 
 		podcasts = append(podcasts, &pb.Podcast{
 			PodcastId:   id,
