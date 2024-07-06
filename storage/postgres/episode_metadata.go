@@ -3,6 +3,7 @@ package postgres
 import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
+	"fmt"
 	"strings"
 
 	"github.com/lib/pq"
@@ -37,16 +38,17 @@ func (e *EpisodeMetadataRepo) CreateEpisodeMetaData(epData *pb.EpisodeMetadata) 
 func (e *EpisodeMetadataRepo) GetTrendingPodcasts(p *pb.Pagination) (*pb.Podcasts, error) {
 	query := `
 	select
-	  podcast_id,
-	  genre,
-	  listen_count,
-	  like_count
+	  	podcast_id,
+	  	genre,
+	  	listen_count,
+	  	like_count
 	from
-	  episode_metadata
+	  	episode_metadata
 	where
-	  created_at between current_timestamp - interval '3 months' and current_timestamp and deleted_at is null
+	  	created_at between 
+			current_timestamp - interval '3 months' and current_timestamp and deleted_at is null
 	order by
-	  like_count, listen_count
+	  	like_count, listen_count
 	limit $1
 	offset $2
 	`
@@ -117,28 +119,38 @@ func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string, p *pb.Pag
 
 func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, error) {
 	query := `
-	select
-		em.podcast_id,
-		array_to_string(array_agg(genre), ',') as genre,
-		array_to_string(array_agg(tags), ',') as tags,
-		sum(case when ui.interaction_type = 'listen' then 1 else 0 end) as listen_count,
-		sum(case when ui.interaction_type = 'like' then 1 else 0 end) as like_count
-	from
-		episode_metadata em
-	join
-		user_interactions ui
-	on
-		em.episode_id = ui.episode_id and em.podcast_id = ui.podcast_id
-	where
-		em.deleted_at is null and ui.deleted_at is null and em.genre::text = any($1)
-	group by
-		em.podcast_id
-	limit $2
-	offset $3`
+	WITH tags_agg AS (
+		SELECT
+			em.podcast_id,
+			string_agg(distinct em.genre::text, ',') as genre,
+			COALESCE(string_agg(distinct tag, ','), '') as tags
+		FROM
+			episode_metadata em
+		LEFT JOIN
+			unnest(em.tags) as tag ON em.podcast_id IS NOT NULL
+		WHERE
+			em.genre::text = any($1) AND em.deleted_at IS NULL
+		GROUP BY
+			em.podcast_id
+	)
+	SELECT
+		ta.podcast_id,
+		ta.genre,
+		ta.tags,
+		COALESCE(SUM(CASE WHEN ui.interaction_type = 'listen' THEN 1 ELSE 0 END), 0) AS listen_count,
+		COALESCE(SUM(CASE WHEN ui.interaction_type = 'like' THEN 1 ELSE 0 END), 0) AS like_count
+	FROM
+		tags_agg ta
+	LEFT JOIN
+		user_interactions ui ON ta.podcast_id = ui.podcast_id AND ui.deleted_at IS NULL
+	GROUP BY
+		ta.podcast_id, ta.genre, ta.tags
+	LIMIT $2
+	OFFSET $3`
 
 	rows, err := e.Db.Query(query, pq.Array(f.Genres), f.Pagination.Limit, f.Pagination.Offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -148,15 +160,26 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 		var listen, like int
 		err := rows.Scan(&id, &genre, &tagsString, &listen, &like)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
-		tagsString = strings.Trim(tagsString, "{}")
 
-		podcasts = append(podcasts, &pb.Podcast{PodcastId: id,
+		// Split the comma-separated tags into a slice
+		tags := strings.Split(tagsString, ",")
+		if tagsString == "" {
+			tags = nil
+		}
+
+		podcasts = append(podcasts, &pb.Podcast{
+			PodcastId:   id,
 			Genre:       genre,
-			Tags:        strings.Split(tagsString, ","),
+			Tags:        tags,
 			ListenCount: int64(listen),
-			LikeCount:   int64(like)})
+			LikeCount:   int64(like),
+		})
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
 	}
 
 	return podcasts, nil

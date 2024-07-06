@@ -10,6 +10,7 @@ import (
 	pbe "discovery_service/genproto/episodes"
 	pbp "discovery_service/genproto/podcasts"
 	"discovery_service/pkg"
+	"reflect"
 
 	"discovery_service/storage/postgres"
 )
@@ -60,12 +61,12 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *p
 		return nil, err
 	}
 	for i := 0; i < len(podcasts.Podcasts); i++ {
-		p, err := e.PodcastClient.GetPodcastById(context.Background(), &pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
+		p, err := e.PodcastClient.GetPodcastById(ctx, &pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}
 
-		count, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
+		count, err := e.CommentClient.CountComments(ctx, &pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}
@@ -161,8 +162,9 @@ func (e *EpisodeMetadataService) SearchEpisode(ctx context.Context, req *pb.Titl
 	resp, err := e.EpisodeClient.SearchEpisodeByTitle(context.Background(), &pbe.Title{Title: req.EpisodeTitle})
 	if err != nil {
 		return nil, err
+	} else if reflect.DeepEqual(resp, &pb.Episode{}) {
+		return &pb.Episode{}, nil
 	}
-
 	listens, likes, err := e.Repo.GetListensAndLikes(resp.Id)
 	if err != nil {
 		return nil, err
