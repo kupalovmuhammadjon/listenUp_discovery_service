@@ -12,6 +12,8 @@ import (
 	"discovery_service/pkg"
 
 	"discovery_service/storage/postgres"
+
+	"github.com/google/uuid"
 )
 
 type EpisodeMetadataService struct {
@@ -53,18 +55,21 @@ func (e *EpisodeMetadataService) CreateEpisodeMetaData(ctx context.Context, epis
 	return &pb.Void{}, err
 }
 
-func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *pb.Pagination) (*pb.Podcasts, error) {
+func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context,
+	req *pb.Pagination) (*pb.Podcasts, error) {
 	podcasts, err := e.Repo.GetTrendingPodcasts(req)
 	if err != nil {
 		return nil, err
 	}
 	for i := 0; i < len(podcasts.Podcasts); i++ {
-		p, err := e.PodcastClient.GetPodcastById(context.Background(), &pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
+		p, err := e.PodcastClient.GetPodcastById(context.Background(),
+			&pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}
 
-		count, err := e.CommentClient.CountComments(context.Background(), &pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
+		count, err := e.CommentClient.CountComments(context.Background(),
+			&pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}
@@ -76,25 +81,36 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context, req *p
 	return podcasts, nil
 }
 
-func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, req *pb.IdPage) (*pb.Podcasts, error) {
-	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(&pb.ID{Id: req.Id})
+func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context,
+	req *pb.IdPage) (*pb.Podcasts, error) {
+	podcastsIdUserWatched, err := e.Repo.GetPodcastsIdUserWatched(
+		&pb.ID{Id: req.Id})
 	if err != nil {
 		return nil, err
 	}
 
 	// podcasts Id of Recommentded podcasts
-	podcastsId, err := e.CollabClient.GetAllPodcastsUsersWorkedOn(ctx, &pbc.PodcastsId{PodcastsId: podcastsIdUserWatched.PodcastsId})
+	podcastsId, err := e.CollabClient.GetAllPodcastsUsersWorkedOn(ctx,
+		&pbc.PodcastsId{PodcastsId: podcastsIdUserWatched.PodcastsId})
 	if err != nil {
 		return nil, err
 	}
 
-	podcasts, err := e.Repo.GetRecommendedPodcasts(podcastsId.PodcastsId[0], req.Pagination)
-	if err != nil {
-		return nil, err
+	podcastsList := pb.Podcasts{}
+	for _, pId := range podcastsId.PodcastsId {
+		if _, err := uuid.Parse(pId); err != nil {
+			continue
+		}
+		podcasts, err := e.Repo.GetRecommendedPodcasts(pId, req.Pagination)
+		if err != nil {
+			return nil, err
+		}
+		podcastsList.Podcasts = append(podcastsList.Podcasts,
+			podcasts.Podcasts...)
 	}
 
-	for i := range podcasts.Podcasts {
-		id := pbp.ID{Id: podcasts.Podcasts[i].PodcastId}
+	for i := range podcastsList.Podcasts {
+		id := pbp.ID{Id: podcastsList.Podcasts[i].PodcastId}
 		additial, err := e.PodcastClient.GetPodcastById(ctx, &id)
 		if err != nil {
 			return nil, err
@@ -102,15 +118,17 @@ func (e *EpisodeMetadataService) GetRecommendedPodcasts(ctx context.Context, req
 
 		// from podcast proto
 		// title, created_at, updated_at
-		podcasts.Podcasts[i].PodcastTitle = additial.Title
-		podcasts.Podcasts[i].CreatedAt = additial.CreatedAt
-		podcasts.Podcasts[i].UpdatedAt = additial.UpdatedAt
+		podcastsList.Podcasts[i].PodcastTitle = additial.Title
+		podcastsList.Podcasts[i].CreatedAt = additial.CreatedAt
+		podcastsList.Podcasts[i].UpdatedAt = additial.UpdatedAt
 
 		// from comments
 		// comment_count
-		e.CommentClient.CountComments(ctx, &pbcom.CountFilter{PodcastId: id.Id})
+		e.CommentClient.CountComments(ctx,
+			&pbcom.CountFilter{PodcastId: id.Id})
 	}
-	return podcasts, nil
+
+	return &podcastsList, nil
 }
 
 func (e *EpisodeMetadataService) GetPodcastsByGenre(ctx context.Context, req *pb.Filter) (*pb.Podcasts, error) {

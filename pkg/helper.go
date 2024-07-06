@@ -21,7 +21,6 @@ func CreateUserManagementClient(cfg *config.Config) pbu.UserManagementClient {
 		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 		return nil
 	}
-	defer conn.Close()
 
 	return pbu.NewUserManagementClient(conn)
 }
@@ -33,7 +32,6 @@ func CreatePodcastsClient(cfg *config.Config) pbp.PodcastsClient {
 		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 		return nil
 	}
-	defer conn.Close()
 
 	return pbp.NewPodcastsClient(conn)
 }
@@ -45,7 +43,6 @@ func CreateEpisodesClient(cfg *config.Config) pbe.EpisodesServiceClient {
 		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 		return nil
 	}
-	defer conn.Close()
 
 	return pbe.NewEpisodesServiceClient(conn)
 }
@@ -57,7 +54,6 @@ func CreateCollaborationsClient(cfg *config.Config) pbCollab.CollaborationsClien
 		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 		return nil
 	}
-	defer conn.Close()
 
 	return pbCollab.NewCollaborationsClient(conn)
 }
@@ -69,7 +65,6 @@ func CreateCommentsClient(cfg *config.Config) pbComment.CommentsClient {
 		log.Println(errors.New("failed to connect to the address: " + err.Error()))
 		return nil
 	}
-	defer conn.Close()
 
 	return pbComment.NewCommentsClient(conn)
 }

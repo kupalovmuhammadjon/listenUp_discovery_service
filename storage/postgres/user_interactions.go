@@ -23,6 +23,8 @@ func (u *UserInterRepo) ValidateUserInteractionId(id string) (bool, error) {
       	end
     from
       	user_interactions
+	where
+		id = $1 and deleted_at is null
 	`
 	var exists bool
 	err := u.Db.QueryRow(query, id).Scan(&exists)
@@ -31,7 +33,7 @@ func (u *UserInterRepo) ValidateUserInteractionId(id string) (bool, error) {
 }
 
 func (u *UserInterRepo) LikeEpisodeOfPodcast(ids *pb.InteractEpisode) (*pb.ID, error) {
-	
+
 	tr, err := u.Db.Begin()
 	if err != nil {
 		return nil, err
