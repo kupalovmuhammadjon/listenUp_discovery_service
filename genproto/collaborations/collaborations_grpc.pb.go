@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CollaborationsClient interface {
 	CreateInvitation(ctx context.Context, in *CreateInvite, opts ...grpc.CallOption) (*ID, error)
+	CreateOwner(ctx context.Context, in *CreateAsOwner, opts ...grpc.CallOption) (*ID, error)
 	RespondInvitation(ctx context.Context, in *CreateCollaboration, opts ...grpc.CallOption) (*ID, error)
 	GetCollaboratorsByPodcastId(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Collaborators, error)
 	UpdateCollaboratorByPodcastId(ctx context.Context, in *UpdateCollaborator, opts ...grpc.CallOption) (*Void, error)
@@ -43,6 +44,15 @@ func NewCollaborationsClient(cc grpc.ClientConnInterface) CollaborationsClient {
 func (c *collaborationsClient) CreateInvitation(ctx context.Context, in *CreateInvite, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
 	err := c.cc.Invoke(ctx, "/collaborations.Collaborations/CreateInvitation", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *collaborationsClient) CreateOwner(ctx context.Context, in *CreateAsOwner, opts ...grpc.CallOption) (*ID, error) {
+	out := new(ID)
+	err := c.cc.Invoke(ctx, "/collaborations.Collaborations/CreateOwner", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +127,7 @@ func (c *collaborationsClient) ValidateCollaborationId(ctx context.Context, in *
 // for forward compatibility
 type CollaborationsServer interface {
 	CreateInvitation(context.Context, *CreateInvite) (*ID, error)
+	CreateOwner(context.Context, *CreateAsOwner) (*ID, error)
 	RespondInvitation(context.Context, *CreateCollaboration) (*ID, error)
 	GetCollaboratorsByPodcastId(context.Context, *ID) (*Collaborators, error)
 	UpdateCollaboratorByPodcastId(context.Context, *UpdateCollaborator) (*Void, error)
@@ -133,6 +144,9 @@ type UnimplementedCollaborationsServer struct {
 
 func (UnimplementedCollaborationsServer) CreateInvitation(context.Context, *CreateInvite) (*ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateInvitation not implemented")
+}
+func (UnimplementedCollaborationsServer) CreateOwner(context.Context, *CreateAsOwner) (*ID, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateOwner not implemented")
 }
 func (UnimplementedCollaborationsServer) RespondInvitation(context.Context, *CreateCollaboration) (*ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RespondInvitation not implemented")
@@ -182,6 +196,24 @@ func _Collaborations_CreateInvitation_Handler(srv interface{}, ctx context.Conte
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CollaborationsServer).CreateInvitation(ctx, req.(*CreateInvite))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Collaborations_CreateOwner_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateAsOwner)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CollaborationsServer).CreateOwner(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/collaborations.Collaborations/CreateOwner",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CollaborationsServer).CreateOwner(ctx, req.(*CreateAsOwner))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -322,6 +354,10 @@ var Collaborations_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateInvitation",
 			Handler:    _Collaborations_CreateInvitation_Handler,
+		},
+		{
+			MethodName: "CreateOwner",
+			Handler:    _Collaborations_CreateOwner_Handler,
 		},
 		{
 			MethodName: "RespondInvitation",
