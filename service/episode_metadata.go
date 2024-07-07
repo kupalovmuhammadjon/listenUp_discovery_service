@@ -64,15 +64,12 @@ func (e *EpisodeMetadataService) GetTrendingPodcasts(ctx context.Context,
 	}
 	for i := 0; i < len(podcasts.Podcasts); i++ {
 
-		p, err := e.PodcastClient.GetPodcastById(context.Background(),
-			&pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
+		p, err := e.PodcastClient.GetPodcastById(ctx, &pbp.ID{Id: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}
 
-		count, err := e.CommentClient.CountComments(context.Background(),
-			&pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
-
+		count, err := e.CommentClient.CountComments(ctx, &pbcom.CountFilter{PodcastId: podcasts.Podcasts[i].PodcastId})
 		if err != nil {
 			return nil, err
 		}

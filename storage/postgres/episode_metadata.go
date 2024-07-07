@@ -4,6 +4,10 @@ import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
 	"fmt"
+<<<<<<< HEAD
+=======
+	"strings"
+>>>>>>> origin/Muhammadjon
 
 	"github.com/lib/pq"
 )
@@ -53,7 +57,6 @@ func (e *EpisodeMetadataRepo) GetTrendingPodcasts(p *pb.Pagination) (*pb.Podcast
     LIMIT $1
     OFFSET $2
     `
-
 	rows, err := e.Db.Query(query, p.Limit, p.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("query error: %w", err)
@@ -130,24 +133,34 @@ func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string,
 
 func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, error) {
 	query := `
-	select
-		em.podcast_id,
-		array_agg(genre) as genre,
-		array_agg(tags) as tags,
-		sum(case when ui.interaction_type = 'listen' then 1 else 0 end) as listen_count,
-		sum(case when ui.interaction_type = 'like' then 1 else 0 end) as like_count
-	from
-		episode_metadata em
-	join
-		user_interactions ui
-	on
-		em.episode_id = ui.episode_id and em.podcast_id = ui.podcast_id
-	where
-		em.deleted_at is null and ui.deleted_at is null and em.genre::text = any($1)
-	group by
-		em.podcast_id
-	limit $2
-	offset $3`
+	WITH tags_agg AS (
+		SELECT
+			em.podcast_id,
+			string_agg(distinct em.genre::text, ',') as genre,
+			COALESCE(string_agg(distinct tag, ','), '') as tags
+		FROM
+			episode_metadata em
+		LEFT JOIN
+			unnest(em.tags) as tag ON em.podcast_id IS NOT NULL
+		WHERE
+			em.genre::text = any($1) AND em.deleted_at IS NULL
+		GROUP BY
+			em.podcast_id
+	)
+	SELECT
+		ta.podcast_id,
+		ta.genre,
+		ta.tags,
+		COALESCE(SUM(CASE WHEN ui.interaction_type = 'listen' THEN 1 ELSE 0 END), 0) AS listen_count,
+		COALESCE(SUM(CASE WHEN ui.interaction_type = 'like' THEN 1 ELSE 0 END), 0) AS like_count
+	FROM
+		tags_agg ta
+	LEFT JOIN
+		user_interactions ui ON ta.podcast_id = ui.podcast_id AND ui.deleted_at IS NULL
+	GROUP BY
+		ta.podcast_id, ta.genre, ta.tags
+	LIMIT $2
+	OFFSET $3`
 
 	rows, err := e.Db.Query(query, pq.Array(f.Genres), f.Pagination.Limit, f.Pagination.Offset)
 	if err != nil {
@@ -159,16 +172,16 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	for rows.Next() {
 		var id string
 		var listen, like int
-		var tags, genre []string
-		err := rows.Scan(&id, pq.Array(&genre), pq.Array(&tags), &listen, &like)
+		var tags, genre string
+		err := rows.Scan(&id, &genre, &tags, &listen, &like)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
 		podcasts = append(podcasts, &pb.Podcast{
 			PodcastId:   id,
-			Genre:       genre,
-			Tags:        tags,
+			Genre:       splitNonEmptyString(genre, ','),
+			Tags:        splitNonEmptyString(tags, ','),
 			ListenCount: int64(listen),
 			LikeCount:   int64(like),
 		})
@@ -179,6 +192,20 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	}
 
 	return podcasts, nil
+}
+
+// splitNonEmptyString splits a string by a separator and removes empty strings
+func splitNonEmptyString(s string, sep rune) []string {
+	fields := strings.FieldsFunc(s, func(c rune) bool {
+		return c == sep
+	})
+	result := []string{}
+	for _, field := range fields {
+		if field != "" {
+			result = append(result, field)
+		}
+	}
+	return result
 }
 
 func (e *EpisodeMetadataRepo) GetListensAndLikes(id string) (int, int, error) {
