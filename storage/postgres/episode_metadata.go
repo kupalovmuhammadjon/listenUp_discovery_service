@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
 	"fmt"
-	"strings"
 
 	"github.com/lib/pq"
 )
@@ -54,42 +53,54 @@ func (e *EpisodeMetadataRepo) GetTrendingPodcasts(p *pb.Pagination) (*pb.Podcast
 	`
 	rows, err := e.Db.Query(query, p.Limit, p.Offset)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("query error: %w", err)
 	}
 	defer rows.Close()
 
-	podcasts := pb.Podcasts{}
+	podcasts := &pb.Podcasts{
+		Podcasts: []*pb.Podcast{},
+	}
+
 	for rows.Next() {
 		p := &pb.Podcast{}
 		err := rows.Scan(&p.PodcastId, &p.Genre, &p.ListenCount, &p.LikeCount)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("scan error: %w", err)
 		}
 		podcasts.Podcasts = append(podcasts.Podcasts, p)
 	}
 
-	return &podcasts, nil
+	// Check for errors encountered during iteration
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	if len(podcasts.Podcasts) == 0 {
+		return &pb.Podcasts{Podcasts: []*pb.Podcast{}}, nil
+	}
+
+	return podcasts, nil
 }
 
-func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string, p *pb.Pagination) (*pb.Podcasts, error) {
+func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string,
+	p *pb.Pagination) (*pb.Podcasts, error) {
 	query := `
-	  select
+	select
 		podcast_id, 
-		array_to_string(array_agg(genre), ',') as genre, 
-		array_to_string(array_agg(tags), ',') as tags, 
+		array_agg(genre) as genre, 
 		sum(listen_count) as listen_count, 
 		sum(like_count) as like_count
-	  from
+	from
 		episode_metadata
-	  where
-		podcast_id = any($1)
-	  group by
+	where
+		podcast_id = $1
+	group by
 		podcast_id
 	limit $2
 	offset $3
 	  `
 
-	rows, err := e.Db.Query(query, pq.Array(podcastId), p.Limit, p.Offset)
+	rows, err := e.Db.Query(query, podcastId, p.Limit, p.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -98,16 +109,13 @@ func (e *EpisodeMetadataRepo) GetRecommendedPodcasts(podcastId string, p *pb.Pag
 	podcasts := pb.Podcasts{}
 	for rows.Next() {
 		var podcast pb.Podcast
-		var tagsString string
-		err := rows.Scan(&podcast.PodcastId, &podcast.Genre, &tagsString,
+		err := rows.Scan(&podcast.PodcastId, pq.Array(&podcast.Genre),
 			&podcast.ListenCount, &podcast.LikeCount)
 
 		if err != nil {
 			return nil, err
 		}
 
-		tagsString = strings.Trim(tagsString, "{}")
-		podcast.Tags = strings.Split(tagsString, ",")
 		podcasts.Podcasts = append(podcasts.Podcasts, &podcast)
 	}
 	if err := rows.Err(); err != nil {
@@ -122,8 +130,8 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	WITH tags_agg AS (
 		SELECT
 			em.podcast_id,
-			string_agg(distinct em.genre::text, ',') as genre,
-			COALESCE(string_agg(distinct tag, ','), '') as tags
+			array_agg(genre) as genre,
+			array_agg(tags) as tags,
 		FROM
 			episode_metadata em
 		LEFT JOIN
@@ -157,17 +165,11 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	var podcasts []*pb.Podcast
 	for rows.Next() {
 		var id string
-		var genre, tagsString []string
 		var listen, like int
-		err := rows.Scan(&id, &genre, &tagsString, &listen, &like)
+		var tags, genre []string
+		err := rows.Scan(&id, pq.Array(&genre), pq.Array(&tags), &listen, &like)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
-		}
-
-		// Split the comma-separated tags into a slice
-		tags := strings.Split(tagsString, ",")
-		if tagsString == "" {
-			tags = nil
 		}
 
 		podcasts = append(podcasts, &pb.Podcast{
@@ -224,13 +226,15 @@ func (e *EpisodeMetadataRepo) GetPodcastIDs() ([]string, error) {
 	return podcastIDs, nil
 }
 
-func (e *EpisodeMetadataRepo) GetPodcastsIdUserWatched(id *pb.ID) (*pb.PodcastsId, error) {
+func (e *EpisodeMetadataRepo) GetPodcastsIdUserWatched(id *pb.ID) (
+	*pb.PodcastsId, error) {
 	queryToTakePodcastsId := `
-	  select 
+	select 
 		distinct podcast_id
-	  from 
+	from 
 		user_interactions
-	  where user_id = $1`
+	where 
+		user_id = $1`
 
 	podcastsId := []string{}
 	rows, err := e.Db.Query(queryToTakePodcastsId, id.Id)

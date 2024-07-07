@@ -26,10 +26,11 @@ func main() {
 
 	server := grpc.NewServer()
 
+	config := config.Load()
 	pbe.RegisterEpisodeMetadataServer(server, service.NewEpisodeMetadata(db))
 	pbu.RegisterUserInteractionsServer(server, service.NewUserInterService(db))
 
-	fmt.Printf("server is listening on port %s", config.Load().DISCOVERY_SERVICE_PORT)
+	fmt.Printf("server is listening on port %s", config.DISCOVERY_SERVICE_PORT)
 	if err := server.Serve(lis); err != nil {
 		log.Fatal(err)
 	}
