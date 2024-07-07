@@ -156,7 +156,8 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 
 	var podcasts []*pb.Podcast
 	for rows.Next() {
-		var id, genre, tagsString string
+		var id string
+		var genre, tagsString []string
 		var listen, like int
 		err := rows.Scan(&id, &genre, &tagsString, &listen, &like)
 		if err != nil {
