@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
 	"fmt"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -130,8 +131,8 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	WITH tags_agg AS (
 		SELECT
 			em.podcast_id,
-			array_agg(genre) as genre,
-			array_agg(tags) as tags,
+			string_agg(distinct em.genre::text, ',') as genre,
+			COALESCE(string_agg(distinct tag, ','), '') as tags
 		FROM
 			episode_metadata em
 		LEFT JOIN
@@ -166,16 +167,16 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	for rows.Next() {
 		var id string
 		var listen, like int
-		var tags, genre []string
-		err := rows.Scan(&id, pq.Array(&genre), pq.Array(&tags), &listen, &like)
+		var tags, genre string
+		err := rows.Scan(&id, &genre, &tags, &listen, &like)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
 		podcasts = append(podcasts, &pb.Podcast{
 			PodcastId:   id,
-			Genre:       genre,
-			Tags:        tags,
+			Genre:       splitNonEmptyString(genre, ','),
+			Tags:        splitNonEmptyString(tags, ','),
 			ListenCount: int64(listen),
 			LikeCount:   int64(like),
 		})
@@ -186,6 +187,20 @@ func (e *EpisodeMetadataRepo) GetPodcastsByGenre(f *pb.Filter) ([]*pb.Podcast, e
 	}
 
 	return podcasts, nil
+}
+
+// splitNonEmptyString splits a string by a separator and removes empty strings
+func splitNonEmptyString(s string, sep rune) []string {
+	fields := strings.FieldsFunc(s, func(c rune) bool {
+		return c == sep
+	})
+	result := []string{}
+	for _, field := range fields {
+		if field != "" {
+			result = append(result, field)
+		}
+	}
+	return result
 }
 
 func (e *EpisodeMetadataRepo) GetListensAndLikes(id string) (int, int, error) {
