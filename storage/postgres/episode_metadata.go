@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	pb "discovery_service/genproto/episode_metadata"
 	"fmt"
-<<<<<<< HEAD
-=======
+
 	"strings"
->>>>>>> origin/Muhammadjon
 
 	"github.com/lib/pq"
 )
